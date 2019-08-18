@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "esModuleInterop": true,
+    "incremental": true,
+    "inlineSources": true,
+    "inlineSourceMap": true,
+    "lib": [
+      "dom",
+      "es2018"
+    ],
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "outDir": "./build",
+    "target": "es2018",
+    "strict": true
+  },
+  "files": [
+    "src/index.ts"
+  ]
+}
