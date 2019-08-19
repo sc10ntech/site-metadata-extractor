@@ -1,31 +1,31 @@
 import xregexp from 'xregexp';
 import stopwords from './stopwords';
 
-const addNewlineToBr = (doc, topNode) => {
+const addNewlineToBr = (doc: any, topNode: any) => {
   const brs = topNode.find('br');
 
-  brs.each(() => {
-    const br = doc(this);
+  brs.each((_index: number, element: any) => {
+    const br = doc(element);
     br.replaceWith('\n\n');
   });
 
   return doc;
 };
 
-const cleanParagraphText = rawText => {
+const cleanParagraphText = (rawText: string) => {
   const text = rawText.trim();
   text.replace(/[\s\t]+/g, ' ');
   return text;
 };
 
-const convertToText = (doc, topNode) => {
-  let texts = [];
+const convertToText = (doc: any, topNode: any) => {
+  let texts: string[] = [];
   const nodes = topNode.contents();
 
   let hangingText = '';
 
-  nodes.each(() => {
-    const node = doc(this);
+  nodes.each((_index: number, element: any) => {
+    const node = doc(element);
     const nodeType = node[0].type;
     const nodeName = node[0].name;
 
@@ -66,19 +66,23 @@ const convertToText = (doc, topNode) => {
   return doc;
 };
 
-const linksToText = (doc, topNode) => {
+const linksToText = (doc: any, topNode: any) => {
   const nodes = topNode.find('a');
-  nodes.each(() => {
-    doc(this).replaceWith(doc(this).html());
+  nodes.each((_index: number, element: any) => {
+    doc(element).replaceWith(doc(element).html());
   });
   return doc;
 };
 
-const removeFewWordsParagraphs = (doc, topNode, lang) => {
+const removeFewWordsParagraphs = (
+  doc: any,
+  topNode: any,
+  lang: string | undefined | null
+) => {
   const allNodes = topNode.find('*');
 
-  allNodes.each(() => {
-    const el = doc(this);
+  allNodes.each((_index: number, element: any) => {
+    const el = doc(element);
     const tag = el[0].name;
     const text = el.text();
 
@@ -101,11 +105,11 @@ const removeFewWordsParagraphs = (doc, topNode, lang) => {
   return doc;
 };
 
-const removeNegativescoresNodes = (doc, topNode) => {
+const removeNegativescoresNodes = (doc: any, topNode: any) => {
   const gravityItems = topNode.find('*[gravityScore]');
 
-  gravityItems.each(() => {
-    const item = doc(this);
+  gravityItems.each((_index: number, element: any) => {
+    const item = doc(element);
     const score = parseInt(item.attr('gravityScore'), 10) || 0;
 
     if (score < 1) {
@@ -116,26 +120,26 @@ const removeNegativescoresNodes = (doc, topNode) => {
   return doc;
 };
 
-const replaceWithText = (doc, topNode) => {
+const replaceWithText = (doc: any, topNode: any) => {
   const nodes = topNode.find('b, strong, i, br, sup');
-  nodes.each(() => {
-    doc(this).replaceWith(doc(this).text());
+  nodes.each((_index: number, element: any) => {
+    doc(element).replaceWith(doc(element).text());
   });
   return doc;
 };
 
-const ulToText = (doc, node) => {
+const ulToText = (doc: any, node: any) => {
   const nodes = node.find('li');
   let text = '';
 
-  nodes.each(() => {
-    text = `${text}\n * ${doc(this).text()}`;
+  nodes.each((_index: number, element: any) => {
+    text = `${text}\n * ${doc(element).text()}`;
   });
   text = `${text}\n`;
   return text;
 };
 
-const formatter = (doc, topNode, lang) => {
+const formatter = (doc: any, topNode: any, lang: string | undefined | null) => {
   removeNegativescoresNodes(doc, topNode);
   linksToText(doc, topNode);
   addNewlineToBr(doc, topNode);

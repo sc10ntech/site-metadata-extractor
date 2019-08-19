@@ -1,13 +1,13 @@
 import fs from 'fs';
 import path from 'path';
 
-const cache = {};
+const cache: any = {};
 
-const candiateWords = strippedInput => {
+const candiateWords = (strippedInput: string) => {
   return strippedInput.split(' ');
 };
 
-const getFilePath = lang => {
+const getFilePath = (lang: string) => {
   return path.join(
     __dirname,
     '..',
@@ -17,16 +17,16 @@ const getFilePath = lang => {
   );
 };
 
-const removePunctuation = content => {
+const removePunctuation = (content: string) => {
   return content.replace(
     /[\|\@\<\>\[\]\"\'\.,-\/#\?!$%\^&\*\+;:{}=\-_`~()]/g,
     ''
   );
 };
 
-const stopwords = (content, lang = 'en') => {
+const stopwords = (content: any, lang: any = 'en') => {
   let filePath = getFilePath(lang);
-  let stopWords;
+  let stopWords: any;
 
   if (!fs.existsSync(filePath)) {
     console.error(
@@ -50,7 +50,7 @@ const stopwords = (content, lang = 'en') => {
 
   const strippedInput = removePunctuation(content);
   const words = candiateWords(strippedInput);
-  const overlappingStopwords = [];
+  const overlappingStopwords: string[] = [];
   let count = 0;
 
   words.forEach(word => {

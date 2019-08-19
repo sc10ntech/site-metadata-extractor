@@ -2,26 +2,29 @@ import { uniq } from 'lodash';
 import formatter from './formatter';
 import stopwords from './stopwords';
 
-function addSiblings(doc, topNode, lang) {
+function addSiblings(doc: any, topNode: any, lang: string) {
   const baselineScoreSiblingsPara = getSiblingsScore(doc, topNode, lang);
   const sibs = topNode.prevAll();
 
-  sibs.each(() => {
-    const currentNode = doc(this);
+  sibs.each((_index: number, element: any) => {
+    const currentNode = doc(element);
     const ps = getSiblingsContent(
       doc,
       lang,
       currentNode,
       baselineScoreSiblingsPara
     );
-    ps.forEach(p => {
-      topNode.prepend('<p>#{p}</p>');
-    });
+
+    if (ps) {
+      ps.forEach(p => {
+        topNode.prepend('<p>#{p}</p>');
+      });
+    }
   });
   return topNode;
 }
 
-function biggestTitleChunk(title, splitter) {
+function biggestTitleChunk(title: string, splitter: string) {
   let largeTextIndex = 0;
   let largeTextLength = 0;
 
@@ -37,14 +40,14 @@ function biggestTitleChunk(title, splitter) {
   return titlePieces[largeTextIndex];
 }
 
-function cleanNull(text) {
+function cleanNull(text: string) {
   if (text) {
     return text.replace(/^null$/g, '');
   }
   return null;
 }
 
-function cleanText(text) {
+function cleanText(text: string) {
   if (text) {
     return text
       .replace(/[\r\n\t]/g, ' ')
@@ -56,7 +59,7 @@ function cleanText(text) {
   return text;
 }
 
-function cleanTitle(title, delimiters) {
+function cleanTitle(title: string, delimiters: string[]) {
   let titleText = title || '';
   let usedDelimiter = false;
 
@@ -69,7 +72,7 @@ function cleanTitle(title, delimiters) {
   return cleanText(titleText);
 }
 
-function getObjectTag(doc, node) {
+function getObjectTag(doc: any, node: any) {
   const srcNode = node.find('param[name=movie');
   if (srcNode.length > 0) {
     const src = srcNode.attr('value');
@@ -81,10 +84,10 @@ function getObjectTag(doc, node) {
 }
 
 function getSiblingsContent(
-  doc,
-  lang,
-  currentSibling,
-  baselineScoreSiblingsPara
+  doc: any,
+  lang: string,
+  currentSibling: any,
+  baselineScoreSiblingsPara: any
 ) {
   if (currentSibling[0].name === 'p' && currentSibling.text().length > 0) {
     return [currentSibling];
@@ -93,9 +96,9 @@ function getSiblingsContent(
     if (potentialParagraphs === null) {
       return null;
     } else {
-      const ps = [];
-      potentialParagraphs.each(() => {
-        const firstParagraph = doc(this);
+      const ps: string[] = [];
+      potentialParagraphs.each((_index: number, element: any) => {
+        const firstParagraph = doc(element);
         const text = firstParagraph.text();
 
         if (text.length > 0) {
@@ -115,14 +118,14 @@ function getSiblingsContent(
   }
 }
 
-function getSiblingsScore(doc, topNode, lang) {
+function getSiblingsScore(doc: any, topNode: any, lang: string) {
   const nodesToCheck = topNode.find('p');
   let base = 100000;
   let paragraphsNumber = 0;
   let paragraphScore = 0;
 
-  nodesToCheck.each(() => {
-    const node = doc(this);
+  nodesToCheck.each((_index: number, element: any) => {
+    const node = doc(element);
     const textNode = node.text();
     const wordStats = stopwords(textNode, lang);
     const highLinkDensity = isHighLinkDensity(doc, node);
@@ -139,7 +142,7 @@ function getSiblingsScore(doc, topNode, lang) {
   return base;
 }
 
-function getScore(node) {
+function getScore(node: any) {
   const gravityScoreString = node.attr('gravityScore');
   if (!gravityScoreString) {
     return 0;
@@ -148,7 +151,7 @@ function getScore(node) {
   }
 }
 
-function getVideoAttrs(doc, node) {
+function getVideoAttrs(doc: any, node: any) {
   const el = doc(node);
   return {
     height: el.attr('height'),
@@ -157,7 +160,7 @@ function getVideoAttrs(doc, node) {
   };
 }
 
-function isBoostable(doc, node, lang) {
+function isBoostable(doc: any, node: any, lang: string) {
   const minimumStopWordCount = 5;
   const maxStepsAwayFromNode = 3;
   let stepsAway = 0;
@@ -165,8 +168,8 @@ function isBoostable(doc, node, lang) {
   const nodes = node.prevAll();
   let boostable = false;
 
-  nodes.each(() => {
-    const currentNode = doc(this);
+  nodes.each((_index: number, element: any) => {
+    const currentNode = doc(element);
     const currentNodeTag = currentNode[0].name;
 
     if (currentNodeTag === 'p') {
@@ -190,16 +193,16 @@ function isBoostable(doc, node, lang) {
   return boostable;
 }
 
-function isHighLinkDensity(doc, node) {
+function isHighLinkDensity(doc: any, node: any) {
   const links = node.find('a');
   if (links.length > 0) {
     const text = node.text();
     const words = text.split(' ');
     const numberOfWords = words.length;
 
-    const sb = [];
-    links.each(() => {
-      sb.push(doc(this).text());
+    const sb: string[] = [];
+    links.each((_index: number, element: any) => {
+      sb.push(doc(element).text());
     });
 
     const linkText = sb.join(' ');
@@ -216,7 +219,7 @@ function isHighLinkDensity(doc, node) {
   return false;
 }
 
-function isNodeScoreThresholdMet(doc, node, e) {
+function isNodeScoreThresholdMet(_doc: any, node: any, e: any) {
   const topNodeScore = getScore(node);
   const currentNodeScore = getScore(e);
   const thresholdScore = topNodeScore * 0.08;
@@ -231,11 +234,11 @@ function isNodeScoreThresholdMet(doc, node, e) {
   return true;
 }
 
-function isTableAndNoParaExist(doc, e) {
+function isTableAndNoParaExist(doc: any, e: any) {
   const subParagraphs = e.find('p');
 
-  subParagraphs.each(() => {
-    const p = doc(this);
+  subParagraphs.each((_index: number, element: any) => {
+    const p = doc(element);
     const text = p.text();
 
     if (text.length < 25) {
@@ -251,11 +254,11 @@ function isTableAndNoParaExist(doc, e) {
   return false;
 }
 
-function postCleanup(doc, targetNode, lang) {
+function postCleanup(doc: any, targetNode: any, lang: any) {
   const node = addSiblings(doc, targetNode, lang);
 
-  node.children.each(() => {
-    const el = doc(this);
+  node.children.each((_index: number, element: any) => {
+    const el = doc(element);
     const elTag = el[0].name;
     if (['p', 'a'].includes(elTag)) {
       if (
@@ -270,7 +273,7 @@ function postCleanup(doc, targetNode, lang) {
   return node;
 }
 
-function rawTitle(doc) {
+function rawTitle(doc: any) {
   let gotTitle = false;
   let titleText = '';
 
@@ -299,7 +302,7 @@ function rawTitle(doc) {
   return titleText;
 }
 
-function updateNodeCount(node, addToCount) {
+function updateNodeCount(node: any, addToCount: number) {
   const countString = node.attr('gravityNodes');
   let currentScore = 0;
 
@@ -311,7 +314,7 @@ function updateNodeCount(node, addToCount) {
   node.attr('gravityNodes', newScore);
 }
 
-function updateScore(node, addToScore) {
+function updateScore(node: any, addToScore: number) {
   const scoreString = node.attr('gravityScore');
   let currentScore = 0;
 
@@ -324,17 +327,17 @@ function updateScore(node, addToScore) {
 }
 
 const extractor = {
-  author: doc => {
+  author: (doc: any) => {
     const authorCandidates = doc(
       "meta[property='article:author'], meta[property='og:article:author'], meta[name='author'], meta[name='dcterms.creator'], meta[name='DC.creator'], meta[name='DC.Creator'], meta[name='dc.creator'], meta[name='creator']"
     );
 
     const authorList = [];
 
-    authorCandidates.each(() => {
-      const author = cleanNull(doc(this).attr('content')).trim();
+    authorCandidates.each((_index: number, element: any) => {
+      const author = cleanNull(doc(element).attr('content'));
       if (author) {
-        authorList.push(author);
+        authorList.push(author.trim());
       }
     });
 
@@ -365,18 +368,18 @@ const extractor = {
     }
     return authorList;
   },
-  calculateBestNode: (doc, lang) => {
-    let topNode = null;
+  calculateBestNode: (doc: any, lang: string) => {
+    let topNode: any = null;
     const nodesToCheck = doc('p, pre, td');
 
-    const parentNodes = [];
-    const nodesWithText = [];
+    const parentNodes: object[] = [];
+    const nodesWithText: object[] = [];
     let startingBoost = 1.0;
     let cnt = 0;
     let i = 0;
 
-    nodesToCheck.each(() => {
-      const node = doc(this);
+    nodesToCheck.each((_index: number, element: any) => {
+      const node = doc(element);
 
       const textNode = node.text();
       const wordStats = stopwords(textNode, lang);
@@ -391,7 +394,7 @@ const extractor = {
     const bottomNegativeScoreNodes = nodesNumber * 0.25;
     const negativeScoring = 0;
 
-    nodesWithText.forEach(node => {
+    nodesWithText.forEach((node: any) => {
       let boostScore = 0.0;
 
       if (isBoostable(doc, node, lang) === true) {
@@ -456,14 +459,14 @@ const extractor = {
 
     return doc(topNode);
   },
-  canonicalLink: doc => {
+  canonicalLink: (doc: any) => {
     const tag = doc('link[rel=canonical]');
     if (tag) {
       return cleanNull(tag.attr('href'));
     }
     return '';
   },
-  copyright: doc => {
+  copyright: (doc: any) => {
     const copyrightCandidates = doc(
       "p[class*='copyright'], div[class*='copyright'], span[class*='copyright'], li[class*='copyright'], p[id*='copyright'], div[id*='copyright'], span[id*='copyright'], li[id*='copyright']"
     );
@@ -481,7 +484,7 @@ const extractor = {
     }
     return null;
   },
-  date: doc => {
+  date: (doc: any) => {
     const dateCandidates = doc(
       "meta[property='article:published_time'], \
     meta[itemprop*='datePublished'], meta[name='dcterms.modified'], \
@@ -508,32 +511,44 @@ const extractor = {
     div[class*='date']"
     );
     if (dateCandidates) {
-      return (
-        cleanNull(dateCandidates.first().attr('content')).trim() ||
-        cleanNull(dateCandidates.first().attr('datetime')).trim() ||
-        cleanText(dateCandidates.first().text())
+      const dateContentCandidate = cleanNull(
+        dateCandidates.first().attr('content')
       );
+      const dateTimeCandidate = cleanNull(
+        dateCandidates.first().attr('datetime')
+      );
+      const dateTextCandidate = cleanText(dateCandidates.first().text());
+      if (dateContentCandidate) {
+        return dateContentCandidate.trim();
+      } else if (dateTimeCandidate) {
+        return dateTimeCandidate.trim();
+      } else if (dateTextCandidate) {
+        return dateTextCandidate.trim();
+      }
     }
     return null;
   },
-  description: doc => {
+  description: (doc: any) => {
     const tag = doc("meta[name=description], meta[property='og:description']");
     if (tag) {
-      return cleanNull(tag.first().attr('content')).trim();
+      const cleaned = cleanNull(tag.first().attr('content'));
+      if (cleaned) {
+        return cleaned.trim();
+      }
     }
     return '';
   },
-  favicon: doc => {
-    const tag = doc('link').filter(() => {
+  favicon: (doc: any) => {
+    const tag = doc('link').filter((_index: number, element: any) => {
       return (
-        doc(this)
+        doc(element)
           .attr('rel')
           .toLowerCase() === 'shortcut icon'
       );
     });
     return tag.attr('href');
   },
-  image: doc => {
+  image: (doc: any) => {
     const images = doc(
       "meta[property='og:image'], meta[property='og:image:url'], meta[itemprop=image], meta[name='twitter:image:src'], meta[name='twitter:image'], meta[name='twitter:image0']"
     );
@@ -543,14 +558,14 @@ const extractor = {
     }
     return null;
   },
-  keywords: doc => {
+  keywords: (doc: any) => {
     const tag = doc('meta[name=keywords');
     if (tag) {
       return cleanNull(tag.attr('content'));
     }
     return '';
   },
-  lang: doc => {
+  lang: (doc: any) => {
     let language = doc('html').attr('lang');
     if (!language) {
       const tag =
@@ -567,14 +582,14 @@ const extractor = {
     }
     return null;
   },
-  links: (doc, topNode, lang) => {
-    const links = [];
+  links: (doc: any, topNode: any, lang: string | undefined | null) => {
+    const links: object[] = [];
 
     const gatherLinks = () => {
       const nodes = topNode.find('a');
-      nodes.each(() => {
-        const href = doc(this).attr('href');
-        const text = doc(this).html();
+      nodes.each((_index: number, element: any) => {
+        const href = doc(element).attr('href');
+        const text = doc(element).html();
         if (href && text) {
           links.push({
             href,
@@ -590,21 +605,26 @@ const extractor = {
     }
     return links;
   },
-  publisher: doc => {
+  publisher: (doc: any) => {
     const publisherCandidates = doc(
       "meta[property='og:site_name'], meta[name='dc.publisher'], meta[name='DC.publisher'], meta[name='DC.Publisher']"
     );
     if (publisherCandidates) {
-      return cleanNull(publisherCandidates.first().attr('content')).trim();
+      const cleanedPublisher = cleanNull(
+        publisherCandidates.first().attr('content')
+      );
+      if (cleanedPublisher) {
+        return cleanedPublisher.trim();
+      }
     }
     return null;
   },
   // Grab the title with soft truncation
-  softTitle: doc => {
+  softTitle: (doc: any) => {
     const titleText = rawTitle(doc);
     return cleanTitle(titleText, ['|', ' - ', '»']);
   },
-  tags: doc => {
+  tags: (doc: any) => {
     let elements = doc("a[rel='tag']");
     if (elements.length === 0) {
       elements = doc(
@@ -615,9 +635,9 @@ const extractor = {
       }
     }
 
-    const tags = [];
-    elements.each(() => {
-      const tag = doc(this);
+    const tags: string[] = [];
+    elements.each((_index: number, element: any) => {
+      const tag = doc(element);
       const tagText = tag.text().trim();
       tagText.replace(/[\s\t\n]+/g, '');
 
@@ -628,7 +648,7 @@ const extractor = {
 
     return uniq(tags);
   },
-  text: (doc, topNode, lang) => {
+  text: (doc: any, topNode: any, lang: string | undefined | null) => {
     if (topNode) {
       topNode = postCleanup(doc, topNode, lang);
       return formatter(doc, topNode, lang);
@@ -638,16 +658,16 @@ const extractor = {
   },
   // Grab the title of an html doc (excluding junk)
   // Hard-truncates titles containing colon or spaced dash
-  title: doc => {
+  title: (doc: any) => {
     const titleText = rawTitle(doc);
     return cleanTitle(titleText, ['|', ' - ', '»', ':']);
   },
-  videos: (doc, topNode) => {
-    const videolist = [];
+  videos: (doc: any, topNode: any) => {
+    const videolist: any = [];
     const videoCandidates = doc(topNode).find('iframe, embed, object, video');
 
-    videoCandidates.each(() => {
-      const candidate = doc(this);
+    videoCandidates.each((_index: number, element: any) => {
+      const candidate = doc(element);
       const tag = candidate[0].name;
 
       if (tag === 'embed') {
@@ -663,9 +683,9 @@ const extractor = {
       }
     });
 
-    const urls = [];
-    const results = [];
-    videolist.forEach(vid => {
+    const urls: string[] = [];
+    const results: any = [];
+    videolist.forEach((vid: any) => {
       if (vid && vid.height && vid.width && urls.indexOf(vid.src) === -1) {
         results.push(vid);
         urls.push(vid.src);

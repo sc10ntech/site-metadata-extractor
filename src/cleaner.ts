@@ -1,5 +1,3 @@
-import DOMPurify from 'dompurify';
-
 function cleanArticleTags(doc) {
   const articles = doc('article');
   articles.each(() => {

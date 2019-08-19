@@ -41,85 +41,101 @@ const extractLinkMetadata = (markup: string, lang: string) => {
 export default extractLinkMetadata;
 
 // Allow access to document properties with lazy evaluation
-export const lazy = (html, language) => {
+export const lazy = (html: any, language: string) => {
   return {
     author: () => {
       const doc = getParsedDoc.call(global, html);
       global.author = extractor.author(doc);
+      return global.author;
     },
     canonicalLink: () => {
       const doc = getParsedDoc.call(global, html);
       global.canonicalLink = extractor.canonicalLink(doc);
+      return global.canonicalLink;
     },
     copyright: () => {
       const doc = getParsedDoc.call(global, html);
       global.copyright = extractor.copyright(doc);
+      return global.copyright;
     },
     date: () => {
       const doc = getParsedDoc.call(global, html);
       global.date = extractor.date(doc);
+      return global.date;
     },
     description: () => {
       const doc = getParsedDoc.call(global, html);
       global.description = extractor.description(doc);
+      return global.description;
     },
     favicon: () => {
       const doc = getParsedDoc.call(global, html);
       global.favicon = extractor.favicon(doc);
+      return global.favicon;
     },
     image: () => {
       const doc = getParsedDoc.call(global, html);
       global.image = extractor.image(doc);
+      return global.image;
     },
     keywords: () => {
       const doc = getParsedDoc.call(global, html);
       global.keywords = extractor.keywords(doc);
+      return global.keywords;
     },
     lang: () => {
       const doc = getParsedDoc.call(global, html);
       global.lang = language || extractor.lang(doc);
+      return global.lang;
     },
-    links: () => {
+    links() {
       if (!global.links) {
         const doc = getParsedDoc.call(global, html);
         const topNode = getTopNode.call(global, doc, this.lang());
         global.links = extractor.links(doc, topNode, this.lang());
+        return global.links;
       }
     },
     publisher: () => {
       const doc = getParsedDoc.call(global, html);
       global.publisher = extractor.publisher(doc);
+      return global.publisher;
     },
     softTitle: () => {
       const doc = getParsedDoc.call(global, html);
       global.softTitle = extractor.softTitle(doc);
+      return global.softTitle;
     },
     tags: () => {
       const doc = getParsedDoc.call(global, html);
       global.tags = extractor.tags(doc);
+      return global.tags;
     },
-    text: () => {
+    text() {
       if (!global.text) {
         const doc = getParsedDoc.call(global, html);
         const topNode = getTopNode.call(global, doc, this.lang());
         global.text = extractor.text(doc, topNode, this.lang());
+        return global.text;
       }
     },
     title: () => {
       const doc = getParsedDoc.call(global, html);
       global.title = extractor.title(doc);
+      return global.title;
     },
-    videos: () => {
+    videos() {
       if (!global.videos) {
         const doc = getParsedDoc.call(global, html);
         const topNode = getTopNode.call(global, doc, this.lang());
         global.videos = extractor.videos(doc, topNode);
+        return global.videos;
       }
     }
   };
 };
 
-function getCleanedDoc(html) {
+function getCleanedDoc(html: any) {
   if (!global.cleanedDoc) {
     const doc = getParsedDoc.call(global, html);
     global.cleanedDoc = cleaner(doc);
@@ -127,10 +143,10 @@ function getCleanedDoc(html) {
   return global.cleanedDoc;
 }
 
-function getParsedDoc(html) {
+function getParsedDoc(html: any) {
   global.doc = cheerio.load(html);
 }
 
-function getTopNode(doc, lang) {
+function getTopNode(doc: any, lang: any) {
   global.topNode = extractor.calculateBestNode(doc, lang);
 }
