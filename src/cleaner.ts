@@ -197,7 +197,7 @@ function getReplacementNodes(doc, div) {
   return nodesToReturn;
 }
 
-function removeBodyClass(doc) {
+function removeBodyClasses(doc) {
   doc('body').removeClass();
   return doc;
 }
@@ -245,6 +245,26 @@ function replaceWithPara(doc, div) {
   return doc;
 }
 
-const cleaner = doc => {};
+const cleaner = doc => {
+  removeBodyClasses(doc);
+  cleanArticleTags(doc);
+  cleanEmTags(doc);
+  cleanCodeBlocks(doc);
+  removeDropCaps(doc);
+  removeScriptsStyles(doc);
+  cleanBadTags(doc);
+  removeNodesRegex(doc, /^caption$/);
+  removeNodesRegex(doc, / google /);
+  removeNodesRegex(doc, /^[^entry-]more.*$/);
+  removeNodesRegex(doc, /[^-]facebook/);
+  removeNodesRegex(doc, /facebook-broadcasting/);
+  removeNodesRegex(doc, /[^-]twitter/);
+  cleanParaSpans(doc);
+  cleanUnderlines(doc);
+  cleanErrantLineBreaks(doc);
+  divToPara(doc, 'div');
+  divToPara(doc, 'span');
+  return doc;
+};
 
 export default cleaner;
