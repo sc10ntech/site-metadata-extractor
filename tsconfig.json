@@ -16,7 +16,5 @@
     "target": "es2018",
     "strict": true
   },
-  "files": [
-    "src/index.ts"
-  ]
+  "include": ["src/**/*"]
 }
