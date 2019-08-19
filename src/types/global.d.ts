@@ -12,12 +12,15 @@ declare namespace NodeJS {
     keywords?: string | null;
     lang?: string | null;
     links?: object[] | null;
+    locale?: string | null;
     publisher?: string | null;
+    siteName?: string | null;
     softTitle?: string | null;
     tags?: string[] | null,
     text?: string | null;
     title?: string | null;
     topNode?: object | null;
+    type?: string | null;
     videos?: string[] | null;
   }
 }

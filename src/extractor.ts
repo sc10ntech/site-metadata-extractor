@@ -1,4 +1,6 @@
+import DOMPurify from 'dompurify';
 import { uniq } from 'lodash';
+
 import formatter from './formatter';
 import stopwords from './stopwords';
 
@@ -337,7 +339,7 @@ const extractor = {
     authorCandidates.each((_index: number, element: any) => {
       const author = cleanNull(doc(element).attr('content'));
       if (author) {
-        authorList.push(author.trim());
+        authorList.push(DOMPurify.sanitize(author.trim()));
       }
     });
 
@@ -363,7 +365,7 @@ const extractor = {
           .first()
           .text();
       if (fallbackAuthor) {
-        authorList.push(cleanText(fallbackAuthor));
+        authorList.push(DOMPurify.sanitize(cleanText(fallbackAuthor)));
       }
     }
     return authorList;
@@ -460,9 +462,14 @@ const extractor = {
     return doc(topNode);
   },
   canonicalLink: (doc: any) => {
-    const tag = doc('link[rel=canonical]');
-    if (tag) {
-      return cleanNull(tag.attr('href'));
+    const canonicalLinkTag = doc(
+      "link[rel='canonical'], meta[property='og:url']"
+    );
+    if (canonicalLinkTag) {
+      const cleanedCanonical = cleanNull(canonicalLinkTag.attr('href'));
+      if (cleanedCanonical) {
+        return DOMPurify.sanitize(cleanedCanonical.trim());
+      }
     }
     return '';
   },
@@ -479,7 +486,7 @@ const extractor = {
         const copyright = text
           .replace(/.*?©(\s*copyright)?([^,;:.|\r\n]+).*/gi, '$2')
           .trim();
-        return cleanText(copyright);
+        return DOMPurify.sanitize(cleanText(copyright));
       }
     }
     return null;
@@ -519,21 +526,25 @@ const extractor = {
       );
       const dateTextCandidate = cleanText(dateCandidates.first().text());
       if (dateContentCandidate) {
-        return dateContentCandidate.trim();
+        return DOMPurify.sanitize(dateContentCandidate.trim());
       } else if (dateTimeCandidate) {
-        return dateTimeCandidate.trim();
+        return DOMPurify.sanitize(dateTimeCandidate.trim());
       } else if (dateTextCandidate) {
-        return dateTextCandidate.trim();
+        return DOMPurify.sanitize(dateTextCandidate.trim());
       }
     }
     return null;
   },
   description: (doc: any) => {
-    const tag = doc("meta[name=description], meta[property='og:description']");
-    if (tag) {
-      const cleaned = cleanNull(tag.first().attr('content'));
-      if (cleaned) {
-        return cleaned.trim();
+    const descriptionTag = doc(
+      "meta[name=description], meta[property='og:description']"
+    );
+    if (descriptionTag) {
+      const cleanedDescription = cleanNull(
+        descriptionTag.first().attr('content')
+      );
+      if (cleanedDescription) {
+        return DOMPurify.sanitize(cleanedDescription.trim());
       }
     }
     return '';
@@ -546,7 +557,7 @@ const extractor = {
           .toLowerCase() === 'shortcut icon'
       );
     });
-    return tag.attr('href');
+    return DOMPurify.sanitize(tag.attr('href'));
   },
   image: (doc: any) => {
     const images = doc(
@@ -554,14 +565,18 @@ const extractor = {
     );
 
     if (images.length > 0 && cleanNull(images.first().attr('content'))) {
-      return cleanNull(images.first().attr('content'));
+      const cleanedImages = cleanNull(images.first().attr('content')) || '';
+      return DOMPurify.sanitize(cleanedImages);
     }
     return null;
   },
   keywords: (doc: any) => {
-    const tag = doc('meta[name=keywords');
-    if (tag) {
-      return cleanNull(tag.attr('content'));
+    const keywordsTag = doc('meta[name=keywords');
+    if (keywordsTag) {
+      const cleansedKeywords = cleanNull(keywordsTag.attr('content'));
+      if (cleansedKeywords) {
+        return DOMPurify.sanitize(cleansedKeywords.trim());
+      }
     }
     return '';
   },
@@ -577,7 +592,7 @@ const extractor = {
       const value = language[0] || language[1];
       const regex = /^[A-Za-z]{2}$/;
       if (regex.test(value)) {
-        return value.toLowerCase();
+        return DOMPurify.sanitize(value.toLowerCase());
       }
     }
     return null;
@@ -592,8 +607,8 @@ const extractor = {
         const text = doc(element).html();
         if (href && text) {
           links.push({
-            href,
-            text
+            href: DOMPurify.sanitize(href),
+            text: DOMPurify.sanitize(text)
           });
         }
       });
@@ -605,24 +620,42 @@ const extractor = {
     }
     return links;
   },
+  locale: (doc: any) => {
+    const localeTag = doc("meta[property='og:locale']");
+    if (localeTag) {
+      const cleanedLocale = cleanNull(localeTag.first().attr('content'));
+      if (cleanedLocale) {
+        return DOMPurify.sanitize(cleanedLocale.trim());
+      }
+    }
+  },
   publisher: (doc: any) => {
     const publisherCandidates = doc(
-      "meta[property='og:site_name'], meta[name='dc.publisher'], meta[name='DC.publisher'], meta[name='DC.Publisher']"
+      "meta[property='og:site_name'], meta[itemprop=name], meta[name='dc.publisher'], meta[name='DC.publisher'], meta[name='DC.Publisher']"
     );
     if (publisherCandidates) {
       const cleanedPublisher = cleanNull(
         publisherCandidates.first().attr('content')
       );
       if (cleanedPublisher) {
-        return cleanedPublisher.trim();
+        return DOMPurify.sanitize(cleanedPublisher.trim());
       }
     }
     return null;
   },
+  siteName: (doc: any) => {
+    const siteNameTag = doc("meta[property='og:site_name']");
+    if (siteNameTag) {
+      const cleanedSiteName = cleanNull(siteNameTag.first().attr('content'));
+      if (cleanedSiteName) {
+        return DOMPurify.sanitize(cleanedSiteName.trim());
+      }
+    }
+  },
   // Grab the title with soft truncation
   softTitle: (doc: any) => {
     const titleText = rawTitle(doc);
-    return cleanTitle(titleText, ['|', ' - ', '»']);
+    return DOMPurify.sanitize(cleanTitle(titleText, ['|', ' - ', '»']));
   },
   tags: (doc: any) => {
     let elements = doc("a[rel='tag']");
@@ -642,7 +675,7 @@ const extractor = {
       tagText.replace(/[\s\t\n]+/g, '');
 
       if (tagText && tagText.length > 0) {
-        tags.push(tagText);
+        tags.push(DOMPurify.sanitize(tagText));
       }
     });
 
@@ -651,7 +684,7 @@ const extractor = {
   text: (doc: any, topNode: any, lang: string | undefined | null) => {
     if (topNode) {
       topNode = postCleanup(doc, topNode, lang);
-      return formatter(doc, topNode, lang);
+      return DOMPurify.sanitize(formatter(doc, topNode, lang));
     } else {
       return '';
     }
@@ -660,7 +693,17 @@ const extractor = {
   // Hard-truncates titles containing colon or spaced dash
   title: (doc: any) => {
     const titleText = rawTitle(doc);
-    return cleanTitle(titleText, ['|', ' - ', '»', ':']);
+    return DOMPurify.sanitize(cleanTitle(titleText, ['|', ' - ', '»', ':']));
+  },
+  type: (doc: any) => {
+    const typeTag = doc("meta[name=type], meta[property='og:type']");
+    if (typeTag) {
+      const cleanedType = cleanNull(typeTag.first().attr('content'));
+      if (cleanedType) {
+        return DOMPurify.sanitize(cleanedType.trim());
+      }
+    }
+    return '';
   },
   videos: (doc: any, topNode: any) => {
     const videolist: any = [];

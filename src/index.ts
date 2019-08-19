@@ -1,5 +1,4 @@
 import cheerio from 'cheerio';
-import DOMPurify from 'dompurify';
 
 import cleaner from './cleaner';
 import extractor from './extractor';
@@ -18,10 +17,13 @@ const extractLinkMetadata = (markup: string, lang: string) => {
     image: extractor.image(doc),
     keywords: extractor.keywords(doc),
     lang: language,
+    locale: extractor.locale(doc),
     publisher: extractor.publisher(doc),
+    siteName: extractor.siteName(doc),
     softTitle: extractor.softTitle(doc),
     tags: extractor.tags(doc),
-    title: extractor.title(doc)
+    title: extractor.title(doc),
+    type: extractor.type(doc)
   };
 
   // Step 1: Clean the doc
@@ -123,6 +125,11 @@ export const lazy = (html: any, language: string) => {
       const doc = getParsedDoc.call(global, html);
       global.title = extractor.title(doc);
       return global.title;
+    },
+    type: () => {
+      const doc = getParsedDoc.call(global, html);
+      global.type = extractor.type(doc);
+      return global.type;
     },
     videos() {
       if (!global.videos) {
