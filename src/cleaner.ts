@@ -1,27 +1,27 @@
-function cleanArticleTags(doc) {
+function cleanArticleTags(doc: any) {
   const articles = doc('article');
-  articles.each(() => {
-    doc(this).removeAttr('id');
-    doc(this).removeAttr('name');
-    doc(this).removeAttr('class');
+  articles.each((_index: number, element: any) => {
+    doc(element).removeAttr('id');
+    doc(element).removeAttr('name');
+    doc(element).removeAttr('class');
   });
   return doc;
 }
 
-function cleanBadTags(doc) {
+function cleanBadTags(doc: any) {
   const removeNodesRe =
     '^side$|combx|retweet|mediaarticlerelated|menucontainer|navbar|partner-gravity-ad|video-full-transcript|storytopbar-bucket|utility-bar|inline-share-tools|comment|PopularQuestions|contact|foot|footer|Footer|footnote|cnn_strycaptiontxt|cnn_html_slideshow|cnn_strylftcntnt|links|meta$|shoutbox|sponsor|tags|socialnetworking|socialNetworking|cnnStryHghLght|cnn_stryspcvbx|^inset$|pagetools|post-attributes|welcome_form|contentTools2|the_answers|communitypromo|runaroundLeft|subscribe|vcard|articleheadings|date|^print$|popup|author-dropdown|tools|socialtools|byline|konafilter|KonaFilter|breadcrumbs|^fn$|wp-caption-text|legende|ajoutVideo|timestamp|js_replies';
   const regex = new RegExp(removeNodesRe, 'i');
 
-  const toRemove = doc('*').filter(() => {
+  const toRemove = doc('*').filter((_index: number, element: any) => {
     return (
-      doc(this)
+      doc(element)
         .attr('id')
         .match(regex) ||
-      doc(this)
+      doc(element)
         .attr('class')
         .match(regex) ||
-      doc(this)
+      doc(element)
         .attr('name')
         .match(regex)
     );
@@ -31,32 +31,32 @@ function cleanBadTags(doc) {
   return doc;
 }
 
-function cleanCodeBlocks(doc) {
+function cleanCodeBlocks(doc: any) {
   const nodes = doc("[class*='highlight-'], pre code, code, pre, ul.task-list");
-  nodes.each(() => {
-    doc(this).replaceWith(doc(this).text());
+  nodes.each((_index: number, element: any) => {
+    doc(element).replaceWith(doc(element).text());
   });
   return doc;
 }
 
-function cleanEmTags(doc) {
+function cleanEmTags(doc: any) {
   const ems = doc('em');
-  ems.each(() => {
+  ems.each((_index: number, element: any) => {
     const images = ems.find('img');
     if (images.length === 0) {
-      doc(this).replaceWith(doc(this).html());
+      doc(element).replaceWith(doc(element).html());
     }
   });
   return doc;
 }
 
-function cleanErrantLineBreaks(doc) {
-  doc('p').each(() => {
-    const node = doc(this);
+function cleanErrantLineBreaks(doc: any) {
+  doc('p').each((_index: number, element: any) => {
+    const node = doc(element);
     const contents = node.contents();
 
-    doc(contents).each(() => {
-      const contentsNode = doc(this);
+    doc(contents).each((_cindex: number, cElement: any) => {
+      const contentsNode = doc(cElement);
       if (contentsNode[0].type === 'text') {
         contentsNode.replaceWith(
           contentsNode.text().replace(/([^\n])\n([^\n])/g, '$1 $2')
@@ -67,23 +67,23 @@ function cleanErrantLineBreaks(doc) {
   return doc;
 }
 
-function cleanParaSpans(doc) {
+function cleanParaSpans(doc: any) {
   const nodes = doc('p span');
-  nodes.each(() => {
-    doc(this).replaceWith(doc(this).html());
+  nodes.each((_index: number, element: any) => {
+    doc(element).replaceWith(doc(element).html());
   });
   return doc;
 }
 
-function cleanUnderlines(doc) {
+function cleanUnderlines(doc: any) {
   const nodes = doc('u');
-  nodes.each(() => {
-    doc(this).replaceWith(doc(this).html());
+  nodes.each((_index: number, element: any) => {
+    doc(element).replaceWith(doc(element).html());
   });
   return doc;
 }
 
-function divToPara(doc, domType) {
+function divToPara(doc: any, domType: any) {
   const divs = doc(domType);
   const lastCount = divs.length + 1;
 
@@ -100,17 +100,17 @@ function divToPara(doc, domType) {
     'ul'
   ];
 
-  divs.each(() => {
-    const div = doc(this);
+  divs.each((_index: number, element: any) => {
+    const div = doc(element);
     const items = div.find(tags.join(', '));
 
     if (items.length === 0) {
-      replaceWithPara(doc, this);
+      replaceWithPara(doc, element);
     } else {
       const replaceNodes = getReplacementNodes(doc, div);
 
       let html = '';
-      replaceNodes.forEach(node => {
+      replaceNodes.forEach((node: any) => {
         if (node !== '') {
           html += `<p>${node}</p>`;
         }
@@ -123,14 +123,14 @@ function divToPara(doc, domType) {
   return doc;
 }
 
-function getReplacementNodes(doc, div) {
-  let replacementText = [];
-  const nodesToReturn = [];
-  const nodesToRemove = [];
+function getReplacementNodes(doc: any, div: any) {
+  let replacementText: string[] = [];
+  const nodesToReturn: any = [];
+  const nodesToRemove: any = [];
   const children = div.contents();
 
-  children.each(() => {
-    const child = doc(this);
+  children.each((_index: number, element: any) => {
+    const child = doc(element);
 
     if (child[0].name === 'p' && replacementText.length > 0) {
       const text = replacementText.join('');
@@ -188,33 +188,33 @@ function getReplacementNodes(doc, div) {
     replacementText = [];
   }
 
-  nodesToRemove.forEach(node => {
+  nodesToRemove.forEach((node: any) => {
     doc(node).remove();
   });
 
   return nodesToReturn;
 }
 
-function removeBodyClasses(doc) {
+function removeBodyClasses(doc: any) {
   doc('body').removeClass();
   return doc;
 }
 
-function removeDropCaps(doc) {
+function removeDropCaps(doc: any) {
   const nodes = doc('span[class~=dropcap], span[class~=drop_cap]');
-  nodes.each(() => {
-    doc(this).replaceWith(doc(this).html());
+  nodes.each((_index: number, element: any) => {
+    doc(element).replaceWith(doc(element).html());
   });
   return doc;
 }
 
-function removeNodesRegex(doc, pattern) {
-  const toRemove = doc('div').filter(() => {
+function removeNodesRegex(doc: any, pattern: any) {
+  const toRemove = doc('div').filter((_index: number, element: any) => {
     return (
-      doc(this)
+      doc(element)
         .attr('id')
         .match(pattern) ||
-      doc(this)
+      doc(element)
         .attr('class')
         .match(pattern)
     );
@@ -224,26 +224,26 @@ function removeNodesRegex(doc, pattern) {
   return doc;
 }
 
-function removeScriptsStyles(doc) {
+function removeScriptsStyles(doc: any) {
   doc('script').remove();
   doc('style').remove();
 
   const comments = doc('*')
     .contents()
-    .filter(() => {
-      return this.type === 'comment';
+    .filter((_index: number, element: any) => {
+      return element.type === 'comment';
     });
 
   return doc;
 }
 
-function replaceWithPara(doc, div) {
+function replaceWithPara(doc: any, div: any) {
   const divContent = doc(div).html();
   doc(div).replaceWith(`<p>${divContent}</p>`);
   return doc;
 }
 
-const cleaner = doc => {
+const cleaner = (doc: any) => {
   removeBodyClasses(doc);
   cleanArticleTags(doc);
   cleanEmTags(doc);
