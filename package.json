@@ -32,9 +32,11 @@
   },
   "devDependencies": {
     "@types/cheerio": "^0.22.13",
+    "@types/dompurify": "0.0.33",
     "@types/jest": "^24.0.17",
     "@types/lodash": "^4.14.137",
     "@types/node": "^12.7.2",
+    "@types/xregexp": "^3.0.30",
     "jest": "^24.9.0",
     "prettier": "^1.18.2",
     "ts-jest": "^24.0.2",
