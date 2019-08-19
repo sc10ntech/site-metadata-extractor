@@ -4,6 +4,7 @@
   "description": "web resource metadata extractor",
   "main": "index.ts",
   "scripts": {
+    "compile": "tsc",
     "test": "npm run test"
   },
   "repository": {
