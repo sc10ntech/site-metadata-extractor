@@ -464,9 +464,17 @@ const extractor = {
       "link[rel='canonical'], meta[property='og:url']"
     );
     if (canonicalLinkTag) {
-      const cleanedCanonical = cleanNull(canonicalLinkTag.attr('href'));
-      if (cleanedCanonical) {
-        return cleanedCanonical.trim();
+      // check if it is link or meta
+      if (canonicalLinkTag[0].name === 'link') {
+        const cleanedCanonicalLink = cleanNull(
+          canonicalLinkTag.first().attr('href')
+        );
+        return cleanedCanonicalLink;
+      } else if (canonicalLinkTag[0].name === 'meta') {
+        const cleanedCanonicalMeta = cleanNull(
+          canonicalLinkTag.attr('content')
+        );
+        return cleanedCanonicalMeta;
       }
     }
     return '';
@@ -489,7 +497,7 @@ const extractor = {
     }
     return null;
   },
-  date: (doc: any) => {
+  date(doc: any) {
     const dateCandidates = doc(
       "meta[property='article:published_time'], \
     meta[itemprop*='datePublished'], meta[name='dcterms.modified'], \
@@ -531,6 +539,16 @@ const extractor = {
         return dateTextCandidate.trim();
       }
     }
+
+    const jsonldData = this.jsonld(doc);
+    if (jsonldData) {
+      if (jsonldData.NewsArticle) {
+        return jsonldData.NewsArticle[0].datePublished.trim();
+      } else if (jsonldData.Article) {
+        return jsonldData.Article[0].datePublished.trim();
+      }
+    }
+
     return null;
   },
   description: (doc: any) => {
@@ -566,6 +584,28 @@ const extractor = {
       return cleanedImages.trim();
     }
     return null;
+  },
+  jsonld: (doc: any) => {
+    const jsonldData: any = {};
+    const jsonldTag = doc('script[type="application/ld+json"]');
+    if (jsonldTag) {
+      try {
+        let parsedJSON = JSON.parse(jsonldTag.html());
+        if (parsedJSON) {
+          if (!Array.isArray(parsedJSON)) {
+            parsedJSON = [parsedJSON];
+          }
+          parsedJSON.forEach((obj: any) => {
+            const type = obj['@type'];
+            jsonldData[type] = jsonldData[type] || [];
+            jsonldData[type].push(obj);
+          });
+        }
+      } catch (e) {
+        console.log(`Error in jsonld parse - ${e}`);
+      }
+      return jsonldData;
+    }
   },
   keywords: (doc: any) => {
     const keywordsTag = doc('meta[name="keywords"]');
