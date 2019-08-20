@@ -14,17 +14,16 @@ function cleanBadTags(doc: any) {
   const regex = new RegExp(removeNodesRe, 'i');
 
   const toRemove = doc('*').filter((_index: number, element: any) => {
-    return (
-      doc(element)
-        .attr('id')
-        .match(regex) ||
-      doc(element)
-        .attr('class')
-        .match(regex) ||
-      doc(element)
-        .attr('name')
-        .match(regex)
-    );
+    const idEl = doc(element).attr('id');
+    const classEl = doc(element).attr('class');
+    const nameEl = doc(element).attr('name');
+    if (!!idEl) {
+      return idEl.match(regex);
+    } else if (!!classEl) {
+      return classEl.match(regex);
+    } else if (!!nameEl) {
+      return nameEl.match(regex);
+    }
   });
 
   doc(toRemove).remove();
@@ -174,10 +173,10 @@ function getReplacementNodes(doc: any, div: any) {
           nextSiblingNode.attr('grv-usedalready', 'yes');
           previousSiblingNode = nextSiblingNode.next();
         }
-        // otherwise
-      } else {
-        nodesToReturn.push(doc(child).html());
       }
+      // otherwise
+    } else {
+      nodesToReturn.push(doc(child).html());
     }
   });
 
@@ -210,14 +209,13 @@ function removeDropCaps(doc: any) {
 
 function removeNodesRegex(doc: any, pattern: any) {
   const toRemove = doc('div').filter((_index: number, element: any) => {
-    return (
-      doc(element)
-        .attr('id')
-        .match(pattern) ||
-      doc(element)
-        .attr('class')
-        .match(pattern)
-    );
+    const idEl = doc(element).attr('id');
+    const classEl = doc(element).attr('class');
+    if (!!idEl) {
+      return idEl.match(pattern);
+    } else if (!!classEl) {
+      return classEl.match(pattern);
+    }
   });
 
   doc(toRemove).remove();

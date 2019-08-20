@@ -53,17 +53,16 @@ const convertToText = (doc: any, topNode: any) => {
     texts = texts = texts.concat(text.split(/\r?\n/));
   }
 
-  texts = texts.map(text => {
-    return text.trim();
+  texts = texts.map(txt => {
+    return txt.trim();
   });
 
   const regex = xregexp('[\\p{Number}\\p{Letter}]');
-  texts = texts.filter(text => {
-    return regex.test(text);
+  texts = texts.filter(txt => {
+    return regex.test(txt);
   });
-  texts.join('\n\n');
 
-  return doc;
+  return texts.join('\n\n');
 };
 
 const linksToText = (doc: any, topNode: any) => {

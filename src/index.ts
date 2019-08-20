@@ -5,7 +5,7 @@ import extractor from './extractor';
 
 const extractLinkMetadata = (markup: string, lang: string) => {
   const doc = cheerio.load(markup);
-  const language = lang;
+  const language = lang || extractor.lang(doc);
 
   const pageData: any = {
     author: extractor.author(doc),
