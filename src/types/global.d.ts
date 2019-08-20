@@ -9,6 +9,7 @@ declare namespace NodeJS {
     doc?: object | null;
     favicon?: string | null;
     image?: string | null;
+    jsonld?: any | null;
     keywords?: string | null;
     lang?: string | null;
     links?: object[] | null;

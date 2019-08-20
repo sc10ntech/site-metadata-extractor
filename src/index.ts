@@ -15,6 +15,7 @@ const extractLinkMetadata = (markup: string, lang: string) => {
     description: extractor.description(doc),
     favicon: extractor.favicon(doc),
     image: extractor.image(doc),
+    jsonld: extractor.jsonld(doc),
     keywords: extractor.keywords(doc),
     lang: language,
     locale: extractor.locale(doc),
@@ -80,6 +81,11 @@ export const lazy = (html: any, language: string) => {
       global.image = extractor.image(doc);
       return global.image;
     },
+    jsonld: () => {
+      const doc = getParsedDoc.call(global, html);
+      global.jsonld = extractor.jsonld(doc);
+      return global.jsonld;
+    },
     keywords: () => {
       const doc = getParsedDoc.call(global, html);
       global.keywords = extractor.keywords(doc);
@@ -89,6 +95,11 @@ export const lazy = (html: any, language: string) => {
       const doc = getParsedDoc.call(global, html);
       global.lang = language || extractor.lang(doc);
       return global.lang;
+    },
+    locale: () => {
+      const doc = getParsedDoc.call(global, html);
+      global.locale = extractor.locale(doc);
+      return global.locale;
     },
     links() {
       if (!global.links) {
@@ -102,6 +113,11 @@ export const lazy = (html: any, language: string) => {
       const doc = getParsedDoc.call(global, html);
       global.publisher = extractor.publisher(doc);
       return global.publisher;
+    },
+    siteName: () => {
+      const doc = getParsedDoc.call(global, html);
+      global.siteName = extractor.siteName(doc);
+      return global.siteName;
     },
     softTitle: () => {
       const doc = getParsedDoc.call(global, html);
