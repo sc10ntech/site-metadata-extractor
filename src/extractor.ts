@@ -642,7 +642,9 @@ const extractor = {
     return null;
   },
   siteName: (doc: any) => {
-    const siteNameTag = doc("meta[property='og:site_name']");
+    const siteNameTag = doc(
+      "meta[property='og:site_name'], meta[itemprop=name]"
+    );
     if (siteNameTag) {
       const cleanedSiteName = cleanNull(siteNameTag.first().attr('content'));
       if (cleanedSiteName) {
