@@ -10,7 +10,7 @@ const extractLinkMetadata = (
   lang: string
 ) => {
   const resourceUrlObj = new URL(resourceUrl);
-  const doc = cheerio.load(markup);
+  const doc = cheerio.load(markup, { xmlMode: true });
   const language = lang || extractor.lang(doc);
 
   const pageData: any = {

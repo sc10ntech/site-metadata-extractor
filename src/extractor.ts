@@ -569,10 +569,12 @@ const extractor = {
   },
   favicon: (doc: any) => {
     const tag = doc('link').filter((_index: number, element: any) => {
-      return doc(element)
-        .attr('rel')
-        .toLowerCase()
-        .includes('icon');
+      if (doc(element).attr('rel')) {
+        return doc(element)
+          .attr('rel')
+          .toLowerCase()
+          .includes('icon');
+      }
     });
     return tag.attr('href');
   },
