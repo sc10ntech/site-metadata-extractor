@@ -459,25 +459,27 @@ const extractor = {
 
     return doc(topNode);
   },
-  canonicalLink: (doc: any) => {
+  // if it gets to the end without one of these links or meta tags, return the original url as canonical
+  canonicalLink: (doc: any, resourceUrl: any) => {
     const canonicalLinkTag = doc(
       "link[rel='canonical'], meta[property='og:url']"
     );
     if (canonicalLinkTag) {
       // check if it is link or meta
-      if (canonicalLinkTag[0].name === 'link') {
+      if (canonicalLinkTag[0] && canonicalLinkTag[0].name === 'link') {
         const cleanedCanonicalLink = cleanNull(
           canonicalLinkTag.first().attr('href')
         );
         return cleanedCanonicalLink;
-      } else if (canonicalLinkTag[0].name === 'meta') {
+      } else if (canonicalLinkTag[0] && canonicalLinkTag[0].name === 'meta') {
         const cleanedCanonicalMeta = cleanNull(
           canonicalLinkTag.attr('content')
         );
         return cleanedCanonicalMeta;
       }
     }
-    return '';
+    // return original url
+    return resourceUrl.href;
   },
   copyright: (doc: any) => {
     const copyrightCandidates = doc(
