@@ -131,12 +131,12 @@ function getReplacementNodes(doc: any, div: any) {
   children.each((_index: number, element: any) => {
     const child = doc(element);
 
-    if (child[0].name === 'p' && replacementText.length > 0) {
+    if (child[0] && child[0].name === 'p' && replacementText.length > 0) {
       const text = replacementText.join('');
       nodesToReturn.push(text);
       replacementText = [];
       nodesToReturn.push(doc(child).html());
-    } else if (child[0].type === 'text') {
+    } else if (child[0] && child[0].type === 'text') {
       const childTextNode = child;
       const childText = child.text();
       const replaceText = childText

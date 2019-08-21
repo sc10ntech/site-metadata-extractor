@@ -26,8 +26,8 @@ const convertToText = (doc: any, topNode: any) => {
 
   nodes.each((_index: number, element: any) => {
     const node = doc(element);
-    const nodeType = node[0].type;
-    const nodeName = node[0].name;
+    const nodeType = node[0] ? node[0].type : null;
+    const nodeName = node[0] ? node[0].name : null;
 
     if (nodeType === 'text') {
       hangingText += node.text();
