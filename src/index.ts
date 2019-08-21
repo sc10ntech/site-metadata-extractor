@@ -62,7 +62,7 @@ export const lazy = (html: any, resourceUrl: string, language: string) => {
     },
     canonicalLink: () => {
       const doc = getParsedDoc.call(global, html);
-      global.canonicalLink = extractor.canonicalLink(doc);
+      global.canonicalLink = extractor.canonicalLink(doc, resourceUrlObj);
       return global.canonicalLink;
     },
     copyright: () => {

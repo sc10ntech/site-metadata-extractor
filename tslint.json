@@ -4,8 +4,16 @@
     "tslint-config-prettier"
   ],
   "rules": {
-    "prettier": true,
+    "interface-name": [
+      true,
+      "never-prefix"
+    ],
     "no-console": false,
+    "no-namespace": [
+      true,
+      "allow-declarations"
+    ],
+    "prettier": true,
     "variable-name": [
       true,
       "ban-keywords",

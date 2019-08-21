@@ -18,7 +18,7 @@ declare namespace NodeJS {
     publisher?: string | null;
     siteName?: string | null;
     softTitle?: string | null;
-    tags?: string[] | null,
+    tags?: string[] | null;
     text?: string | null;
     title?: string | null;
     topNode?: object | null;
