@@ -1,15 +1,21 @@
 import cheerio from 'cheerio';
+import { URL } from 'url';
 
 import cleaner from './cleaner';
 import extractor from './extractor';
 
-const extractLinkMetadata = (markup: string, lang: string) => {
+const extractLinkMetadata = (
+  markup: string,
+  resourceUrl: string,
+  lang: string
+) => {
+  const resourceUrlObj = new URL(resourceUrl);
   const doc = cheerio.load(markup);
   const language = lang || extractor.lang(doc);
 
   const pageData: any = {
     author: extractor.author(doc),
-    canonicalLink: extractor.canonicalLink(doc),
+    canonicalLink: extractor.canonicalLink(doc, resourceUrlObj),
     copyright: extractor.copyright(doc),
     date: extractor.date(doc),
     description: extractor.description(doc),
@@ -19,6 +25,7 @@ const extractLinkMetadata = (markup: string, lang: string) => {
     keywords: extractor.keywords(doc),
     lang: language,
     locale: extractor.locale(doc),
+    origin: resourceUrlObj.origin,
     publisher: extractor.publisher(doc),
     siteName: extractor.siteName(doc),
     softTitle: extractor.softTitle(doc),
@@ -44,7 +51,9 @@ const extractLinkMetadata = (markup: string, lang: string) => {
 export default extractLinkMetadata;
 
 // Allow access to document properties with lazy evaluation
-export const lazy = (html: any, language: string) => {
+export const lazy = (html: any, resourceUrl: string, language: string) => {
+  const resourceUrlObj = new URL(resourceUrl);
+
   return {
     author: () => {
       const doc = getParsedDoc.call(global, html);
@@ -108,6 +117,10 @@ export const lazy = (html: any, language: string) => {
         global.links = extractor.links(doc, topNode, this.lang());
         return global.links;
       }
+    },
+    origin: () => {
+      global.originUrl = resourceUrlObj.origin;
+      return global.originUrl;
     },
     publisher: () => {
       const doc = getParsedDoc.call(global, html);

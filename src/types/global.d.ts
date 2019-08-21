@@ -14,6 +14,7 @@ declare namespace NodeJS {
     lang?: string | null;
     links?: object[] | null;
     locale?: string | null;
+    originUrl?: string | null;
     publisher?: string | null;
     siteName?: string | null;
     softTitle?: string | null;
