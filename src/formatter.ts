@@ -144,7 +144,7 @@ const formatter = (doc: any, topNode: any, lang: string | undefined | null) => {
   addNewlineToBr(doc, topNode);
   replaceWithText(doc, topNode);
   removeFewWordsParagraphs(doc, topNode, lang);
-  return convertToText(doc, topNode);
+  return convertToText(doc, topNode).replace(/\n/g, ' ');
 };
 
 export default formatter;
