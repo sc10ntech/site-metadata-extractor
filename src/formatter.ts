@@ -119,6 +119,46 @@ const removeNegativescoresNodes = (doc: any, topNode: any) => {
   return doc;
 };
 
+const replaceCharacters = (text: string) => {
+  let processedText = text;
+  // if element does not match any in map and starts with & and ends with ;, replace with empty string
+  const htmlEntities: any = {
+    '&amp;': '&',
+    '&apos;': "'",
+    '&cent;': '¢',
+    '&copy;': '©',
+    '&euro;': '€',
+    '&gt;': '>',
+    '&lt;': '<',
+    '&nbsp;': ' ',
+    '&pound;': '£',
+    '&quot;': '"',
+    '&reg;': '®',
+    '&yen;': '¥'
+  };
+
+  const escapeChars: any = {
+    '"': '"',
+    "'": "'",
+    // tslint:disable-next-line: object-literal-sort-keys
+    '\n': ' ',
+    '\r': ' ',
+    '\\': '\\'
+  };
+
+  for (const key of Object.keys(htmlEntities)) {
+    const htmlregex = new RegExp(key, 'g');
+    processedText = processedText.replace(htmlregex, htmlEntities[key]);
+  }
+
+  for (const key of Object.keys(escapeChars)) {
+    const escapeCharsRegex = new RegExp(key, 'g');
+    processedText = processedText.replace(escapeCharsRegex, escapeChars[key]);
+  }
+
+  return processedText;
+};
+
 const replaceWithText = (doc: any, topNode: any) => {
   const nodes = topNode.find('b, strong, i, br, sup');
   nodes.each((_index: number, element: any) => {
@@ -144,7 +184,8 @@ const formatter = (doc: any, topNode: any, lang: string | undefined | null) => {
   addNewlineToBr(doc, topNode);
   replaceWithText(doc, topNode);
   removeFewWordsParagraphs(doc, topNode, lang);
-  return convertToText(doc, topNode).replace(/\n/g, ' ');
+  const convertedText = convertToText(doc, topNode).replace(/\n/g, ' ');
+  return replaceCharacters(convertedText);
 };
 
 export default formatter;
