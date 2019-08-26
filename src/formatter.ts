@@ -146,8 +146,7 @@ export const replaceCharacters = (
     "'": "'",
     // tslint:disable-next-line: object-literal-sort-keys
     '\n': ' ',
-    '\r': ' ',
-    '\\': '\\'
+    '\r': ' '
   };
 
   if (html) {
