@@ -1,7 +1,7 @@
 import xregexp from 'xregexp';
 import stopwords from './stopwords';
 
-const addNewlineToBr = (doc: any, topNode: any) => {
+export const addNewlineToBr = (doc: any, topNode: any) => {
   const brs = topNode.find('br');
 
   brs.each((_index: number, element: any) => {
@@ -12,13 +12,13 @@ const addNewlineToBr = (doc: any, topNode: any) => {
   return doc;
 };
 
-const cleanParagraphText = (rawText: string) => {
+export const cleanParagraphText = (rawText: string) => {
   const text = rawText.trim();
   text.replace(/[\s\t]+/g, ' ');
   return text;
 };
 
-const convertToText = (doc: any, topNode: any) => {
+export const convertToText = (doc: any, topNode: any) => {
   let texts: string[] = [];
   const nodes = topNode.contents();
 
@@ -65,7 +65,7 @@ const convertToText = (doc: any, topNode: any) => {
   return texts.join('\n\n');
 };
 
-const linksToText = (doc: any, topNode: any) => {
+export const linksToText = (doc: any, topNode: any) => {
   const nodes = topNode.find('a');
   nodes.each((_index: number, element: any) => {
     doc(element).replaceWith(doc(element).html());
@@ -73,7 +73,7 @@ const linksToText = (doc: any, topNode: any) => {
   return doc;
 };
 
-const removeFewWordsParagraphs = (
+export const removeFewWordsParagraphs = (
   doc: any,
   topNode: any,
   lang: string | undefined | null
@@ -104,7 +104,7 @@ const removeFewWordsParagraphs = (
   return doc;
 };
 
-const removeNegativescoresNodes = (doc: any, topNode: any) => {
+export const removeNegativescoresNodes = (doc: any, topNode: any) => {
   const gravityItems = topNode.find('*[gravityScore]');
 
   gravityItems.each((_index: number, element: any) => {
@@ -119,7 +119,11 @@ const removeNegativescoresNodes = (doc: any, topNode: any) => {
   return doc;
 };
 
-const replaceCharacters = (text: string) => {
+export const replaceCharacters = (
+  text: string,
+  html: boolean,
+  chars: boolean
+) => {
   let processedText = text;
   // if element does not match any in map and starts with & and ends with ;, replace with empty string
   const htmlEntities: any = {
@@ -146,20 +150,24 @@ const replaceCharacters = (text: string) => {
     '\\': '\\'
   };
 
-  for (const key of Object.keys(htmlEntities)) {
-    const htmlregex = new RegExp(key, 'g');
-    processedText = processedText.replace(htmlregex, htmlEntities[key]);
+  if (html) {
+    for (const key of Object.keys(htmlEntities)) {
+      const htmlregex = new RegExp(key, 'g');
+      processedText = processedText.replace(htmlregex, htmlEntities[key]);
+    }
   }
 
-  for (const key of Object.keys(escapeChars)) {
-    const escapeCharsRegex = new RegExp(key, 'g');
-    processedText = processedText.replace(escapeCharsRegex, escapeChars[key]);
+  if (chars) {
+    for (const key of Object.keys(escapeChars)) {
+      const escapeCharsRegex = new RegExp(key, 'g');
+      processedText = processedText.replace(escapeCharsRegex, escapeChars[key]);
+    }
   }
 
   return processedText;
 };
 
-const replaceWithText = (doc: any, topNode: any) => {
+export const replaceWithText = (doc: any, topNode: any) => {
   const nodes = topNode.find('b, strong, i, br, sup');
   nodes.each((_index: number, element: any) => {
     doc(element).replaceWith(doc(element).text());
@@ -167,7 +175,7 @@ const replaceWithText = (doc: any, topNode: any) => {
   return doc;
 };
 
-const ulToText = (doc: any, node: any) => {
+export const ulToText = (doc: any, node: any) => {
   const nodes = node.find('li');
   let text = '';
 
@@ -185,7 +193,7 @@ const formatter = (doc: any, topNode: any, lang: string | undefined | null) => {
   replaceWithText(doc, topNode);
   removeFewWordsParagraphs(doc, topNode, lang);
   const convertedText = convertToText(doc, topNode).replace(/\n/g, ' ');
-  return replaceCharacters(convertedText);
+  return replaceCharacters(convertedText, false, true);
 };
 
 export default formatter;

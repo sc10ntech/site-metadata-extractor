@@ -1,5 +1,5 @@
 import { uniq } from 'lodash';
-import formatter from './formatter';
+import formatter, { replaceCharacters } from './formatter';
 import stopwords from './stopwords';
 
 function addSiblings(doc: any, topNode: any, lang: string) {
@@ -562,7 +562,7 @@ const extractor = {
         descriptionTag.first().attr('content')
       );
       if (cleanedDescription) {
-        return cleanedDescription.trim();
+        return replaceCharacters(cleanedDescription.trim(), false, true);
       }
     }
     return '';
@@ -736,7 +736,8 @@ const extractor = {
   // Hard-truncates titles containing colon or spaced dash
   title: (doc: any) => {
     const titleText = rawTitle(doc);
-    return cleanTitle(titleText, ['|', ' - ', '»', ':']);
+    const cleanedTitle = cleanTitle(titleText, ['|', ' - ', '»', ':']);
+    return replaceCharacters(cleanedTitle, false, true);
   },
   type: (doc: any) => {
     const typeTag = doc("meta[name=type], meta[property='og:type']");
