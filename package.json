@@ -35,7 +35,7 @@
   "devDependencies": {
     "@types/cheerio": "^0.22.13",
     "@types/dompurify": "0.0.33",
-    "@types/jest": "^24.0.17",
+    "@types/jest": "^24.0.18",
     "@types/lodash": "^4.14.137",
     "@types/node": "^12.7.2",
     "@types/xregexp": "^3.0.30",
@@ -43,7 +43,7 @@
     "jest": "^24.9.0",
     "prettier": "^1.18.2",
     "ts-jest": "^24.0.2",
-    "tslint": "^5.18.0",
+    "tslint": "^5.19.0",
     "tslint-config-prettier": "^1.18.0",
     "tslint-plugin-prettier": "^2.0.1",
     "typescript": "^3.5.3"
