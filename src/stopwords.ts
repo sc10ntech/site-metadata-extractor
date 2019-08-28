@@ -8,7 +8,7 @@ const candiateWords = (strippedInput: string) => {
 };
 
 const getFilePath = (lang: string) => {
-  return path.join(
+  return path.resolve(
     __dirname,
     '..',
     'data',

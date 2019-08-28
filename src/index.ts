@@ -7,7 +7,7 @@ import extractor from './extractor';
 const extractLinkMetadata = (
   markup: string,
   resourceUrl: string,
-  lang: string
+  lang: string = 'en'
 ) => {
   const resourceUrlObj = new URL(resourceUrl);
   const doc = cheerio.load(markup, { xmlMode: true });
