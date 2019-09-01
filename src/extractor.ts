@@ -73,7 +73,7 @@ function cleanTitle(title: string, delimiters: string[]) {
 }
 
 function getObjectTag(doc: any, node: any) {
-  const srcNode = node.find('param[name=movie');
+  const srcNode = node.find('param[name=movie]');
   if (srcNode.length > 0) {
     const src = srcNode.attr('value');
     const video = getVideoAttrs(doc, node);
