@@ -1,4 +1,4 @@
-import * as isAbsoluteUrl from 'is-absolute-url';
+import isAbsoluteUrl from 'is-absolute-url';
 import { uniq } from 'lodash';
 import { URL } from 'url';
 import formatter, { replaceCharacters } from './formatter';
