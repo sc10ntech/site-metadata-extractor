@@ -482,7 +482,7 @@ const extractor = {
         let cleanedCanonicalMeta = cleanNull(canonicalLinkTag.attr('content'));
         // check if resourceUrl protocol is https? if so, use that
         const urlProtocol = resourceUrlObj.protocol;
-        if (urlProtocol === 'https') {
+        if (urlProtocol === 'https:') {
           cleanedCanonicalMeta = cleanedCanonicalMeta.replace(
             /^http:\/\//i,
             'https://'
