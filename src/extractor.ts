@@ -1,4 +1,6 @@
+import * as isAbsoluteUrl from 'is-absolute-url';
 import { uniq } from 'lodash';
+import { URL } from 'url';
 import formatter, { replaceCharacters } from './formatter';
 import stopwords from './stopwords';
 
@@ -44,7 +46,7 @@ function cleanNull(text: string) {
   if (text) {
     return text.replace(/^null$/g, '');
   }
-  return null;
+  return '';
 }
 
 function cleanText(text: string) {
@@ -465,16 +467,28 @@ const extractor = {
       "link[rel='canonical'], meta[property='og:url']"
     );
     if (canonicalLinkTag) {
+      const resourceUrlObj = new URL(resourceUrl);
       // check if it is link or meta
       if (canonicalLinkTag[0] && canonicalLinkTag[0].name === 'link') {
         const cleanedCanonicalLink = cleanNull(
           canonicalLinkTag.first().attr('href')
         );
+        // check if link is a relative url, if so, append origin
+        if (!isAbsoluteUrl(cleanedCanonicalLink)) {
+          return `${resourceUrlObj.origin}${cleanedCanonicalLink}`;
+        }
         return cleanedCanonicalLink;
       } else if (canonicalLinkTag[0] && canonicalLinkTag[0].name === 'meta') {
-        const cleanedCanonicalMeta = cleanNull(
-          canonicalLinkTag.attr('content')
-        );
+        let cleanedCanonicalMeta = cleanNull(canonicalLinkTag.attr('content'));
+        // check if resourceUrl protocol is https? if so, use that
+        const urlProtocol = resourceUrlObj.protocol;
+        if (urlProtocol === 'https') {
+          cleanedCanonicalMeta = cleanedCanonicalMeta.replace(
+            /^http:\/\//i,
+            'https://'
+          );
+          return cleanedCanonicalMeta;
+        }
         return cleanedCanonicalMeta;
       }
     }
