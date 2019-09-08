@@ -256,6 +256,10 @@ function isTableAndNoParaExist(doc: any, e: any) {
   return false;
 }
 
+function isValidDate(d: any) {
+  return d instanceof Date && !isNaN(d.getTime());
+}
+
 function postCleanup(doc: any, targetNode: any, lang: any) {
   const node = addSiblings(doc, targetNode, lang);
 
@@ -539,6 +543,9 @@ const extractor = {
     p[class*='date'], \
     div[class*='date']"
     );
+
+    let dateToReturn;
+
     if (dateCandidates) {
       const dateContentCandidate = cleanNull(
         dateCandidates.first().attr('content')
@@ -547,22 +554,27 @@ const extractor = {
         dateCandidates.first().attr('datetime')
       );
       const dateTextCandidate = cleanText(dateCandidates.first().text());
+
       if (dateContentCandidate) {
-        return dateContentCandidate.trim();
+        dateToReturn = dateContentCandidate.trim();
       } else if (dateTimeCandidate) {
-        return dateTimeCandidate.trim();
+        dateToReturn = dateTimeCandidate.trim();
       } else if (dateTextCandidate) {
-        return dateTextCandidate.trim();
+        dateToReturn = dateTextCandidate.trim();
       }
     }
 
     const jsonldData = this.jsonld(doc);
     if (jsonldData) {
       if (jsonldData.NewsArticle) {
-        return jsonldData.NewsArticle[0].datePublished.trim();
+        dateToReturn = jsonldData.NewsArticle[0].datePublished.trim();
       } else if (jsonldData.Article) {
-        return jsonldData.Article[0].datePublished.trim();
+        dateToReturn = jsonldData.Article[0].datePublished.trim();
       }
+    }
+
+    if (isValidDate(dateToReturn)) {
+      return dateToReturn;
     }
 
     return null;
