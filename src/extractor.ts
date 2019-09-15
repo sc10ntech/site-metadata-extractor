@@ -498,7 +498,7 @@ const extractor = {
       }
     }
     // return original url
-    return resourceUrl.href;
+    return resourceUrl;
   },
   copyright: (doc: any) => {
     const copyrightCandidates = doc(
