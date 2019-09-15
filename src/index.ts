@@ -15,11 +15,11 @@ const extractLinkMetadata = (
 
   const pageData: any = {
     author: extractor.author(doc),
-    canonicalLink: extractor.canonicalLink(doc, resourceUrlObj),
+    canonicalLink: extractor.canonicalLink(doc, resourceUrl),
     copyright: extractor.copyright(doc),
     date: extractor.date(doc),
     description: extractor.description(doc),
-    favicon: extractor.favicon(doc),
+    favicon: extractor.favicon(doc, resourceUrlObj),
     image: extractor.image(doc),
     jsonld: extractor.jsonld(doc),
     keywords: extractor.keywords(doc),
@@ -62,7 +62,7 @@ export const lazy = (html: any, resourceUrl: string, language: string) => {
     },
     canonicalLink: () => {
       const doc = getParsedDoc.call(global, html);
-      global.canonicalLink = extractor.canonicalLink(doc, resourceUrlObj);
+      global.canonicalLink = extractor.canonicalLink(doc, resourceUrl);
       return global.canonicalLink;
     },
     copyright: () => {
@@ -82,7 +82,7 @@ export const lazy = (html: any, resourceUrl: string, language: string) => {
     },
     favicon: () => {
       const doc = getParsedDoc.call(global, html);
-      global.favicon = extractor.favicon(doc);
+      global.favicon = extractor.favicon(doc, resourceUrlObj);
       return global.favicon;
     },
     image: () => {

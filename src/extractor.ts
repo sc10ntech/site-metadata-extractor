@@ -593,7 +593,7 @@ const extractor = {
     }
     return '';
   },
-  favicon: (doc: any) => {
+  favicon: (doc: any, resourceUrlObj: any) => {
     const tag = doc('link').filter((_index: number, element: any) => {
       if (doc(element).attr('rel')) {
         return doc(element)
@@ -602,7 +602,13 @@ const extractor = {
           .includes('icon');
       }
     });
-    return tag.attr('href');
+    const faviconLink = tag.attr('href');
+    // ensure the url returned from favicon is absolute url
+    if (!isAbsoluteUrl(faviconLink)) {
+      // add the origin to the faviconLink
+      return `${resourceUrlObj.origin}${faviconLink}`;
+    }
+    return faviconLink;
   },
   image: (doc: any) => {
     const images = doc(
