@@ -257,7 +257,8 @@ function isTableAndNoParaExist(doc: any, e: any) {
 }
 
 function isValidDate(d: any) {
-  return d instanceof Date && !isNaN(d.getTime());
+  const parsedDate = Date.parse(d);
+  return new Date(d).toString() !== 'Invalid Date' && !isNaN(parsedDate);
 }
 
 function postCleanup(doc: any, targetNode: any, lang: any) {
