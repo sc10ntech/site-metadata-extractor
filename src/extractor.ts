@@ -605,7 +605,7 @@ const extractor = {
     });
     const faviconLink = tag.attr('href');
     // ensure the url returned from favicon is absolute url
-    if (!isAbsoluteUrl(faviconLink)) {
+    if (faviconLink.length > 0 && !isAbsoluteUrl(faviconLink)) {
       // add the origin to the faviconLink
       return `${resourceUrlObj.origin}${faviconLink}`;
     }
