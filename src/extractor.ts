@@ -44,7 +44,7 @@ function biggestTitleChunk(title: string, splitter: string) {
 
 function cleanNull(text: string) {
   if (text) {
-    return text.replace(/^null$/g, '');
+    return text?.replace(/^null$/g, '');
   }
   return '';
 }
@@ -52,7 +52,7 @@ function cleanNull(text: string) {
 function cleanText(text: string) {
   if (text) {
     return text
-      .replace(/[\r\n\t]/g, ' ')
+      ?.replace(/[\r\n\t]/g, ' ')
       .replace(/\s\s+/g, ' ')
       .replace(/<!--.+?-->/g, '')
       .replace(/�/g, '')
@@ -286,20 +286,20 @@ function rawTitle(doc: any) {
 
   [
     doc('meta[property="og:title"]')
-      .first()
-      .attr('content'),
+      ?.first()
+      ?.attr('content'),
     doc('h1[class*="title"]')
-      .first()
-      .text(),
+      ?.first()
+      ?.text(),
     doc('title')
-      .first()
-      .text(),
+      ?.first()
+      ?.text(),
     doc('h1')
-      .first()
-      .text(),
+      ?.first()
+      ?.text(),
     doc('h2')
-      .first()
-      .text()
+      ?.first()
+      ?.text()
   ].forEach(candidate => {
     if (candidate && candidate.trim() && !gotTitle) {
       titleText = candidate.trim();
@@ -352,23 +352,23 @@ const extractor = {
     if (authorList.length === 0) {
       const fallbackAuthor =
         doc("span[class*='author']")
-          .first()
-          .text() ||
+          ?.first()
+          ?.text() ||
         doc("p[class*='author']")
-          .first()
-          .text() ||
+          ?.first()
+          ?.text() ||
         doc("div[class*='author']")
-          .first()
-          .text() ||
+          ?.first()
+          ?.text() ||
         doc("span[class*='byline']")
-          .first()
-          .text() ||
+          ?.first()
+          ?.text() ||
         doc("p[class*='byline']")
-          .first()
-          .text() ||
+          ?.first()
+          ?.text() ||
         doc("div[class*='byline']")
-          .first()
-          .text();
+          ?.first()
+          ?.text();
       if (fallbackAuthor) {
         authorList.push(cleanText(fallbackAuthor));
       }
@@ -476,7 +476,7 @@ const extractor = {
       // check if it is link or meta
       if (canonicalLinkTag[0] && canonicalLinkTag[0].name === 'link') {
         const cleanedCanonicalLink = cleanNull(
-          canonicalLinkTag.first().attr('href')
+          canonicalLinkTag?.first()?.attr('href')
         );
         // check if link is a relative url, if so, append origin
         if (!isAbsoluteUrl(cleanedCanonicalLink)) {
@@ -484,7 +484,7 @@ const extractor = {
         }
         return cleanedCanonicalLink;
       } else if (canonicalLinkTag[0] && canonicalLinkTag[0].name === 'meta') {
-        let cleanedCanonicalMeta = cleanNull(canonicalLinkTag.attr('content'));
+        let cleanedCanonicalMeta = cleanNull(canonicalLinkTag?.attr('content'));
         // check if resourceUrl protocol is https? if so, use that
         const urlProtocol = resourceUrlObj.protocol;
         if (urlProtocol === 'https:') {
@@ -568,9 +568,9 @@ const extractor = {
     const jsonldData = this.jsonld(doc);
     if (jsonldData) {
       if (jsonldData.NewsArticle) {
-        dateToReturn = jsonldData.NewsArticle[0].datePublished.trim();
+        dateToReturn = jsonldData?.NewsArticle[0]?.datePublished?.trim();
       } else if (jsonldData.Article) {
-        dateToReturn = jsonldData.Article[0].datePublished.trim();
+        dateToReturn = jsonldData?.Article[0]?.datePublished?.trim();
       }
     }
 
@@ -586,10 +586,10 @@ const extractor = {
     );
     if (descriptionTag) {
       const cleanedDescription = cleanNull(
-        descriptionTag.first().attr('content')
+        descriptionTag?.first()?.attr('content')
       );
       if (cleanedDescription) {
-        return replaceCharacters(cleanedDescription.trim(), false, true);
+        return replaceCharacters(cleanedDescription?.trim(), false, true);
       }
     }
     return '';
@@ -599,8 +599,8 @@ const extractor = {
       if (doc(element).attr('rel')) {
         return doc(element)
           .attr('rel')
-          .toLowerCase()
-          .includes('icon');
+          ?.toLowerCase()
+          ?.includes('icon');
       }
     });
     const faviconLink = tag.attr('href');
@@ -616,9 +616,9 @@ const extractor = {
       "meta[property='og:image'], meta[property='og:image:url'], meta[itemprop=image], meta[name='twitter:image:src'], meta[name='twitter:image'], meta[name='twitter:image0']"
     );
 
-    if (images.length > 0 && cleanNull(images.first().attr('content'))) {
-      const cleanedImages = cleanNull(images.first().attr('content')) || '';
-      return cleanedImages.trim();
+    if (images.length > 0 && cleanNull(images?.first()?.attr('content'))) {
+      const cleanedImages = cleanNull(images?.first()?.attr('content')) || '';
+      return cleanedImages?.trim();
     }
     return null;
   },
@@ -640,6 +640,7 @@ const extractor = {
         }
       } catch (e) {
         console.log(`Error in jsonld parse - ${e}`);
+        return;
       }
       return jsonldData;
     }
@@ -647,19 +648,19 @@ const extractor = {
   keywords: (doc: any) => {
     const keywordsTag = doc('meta[name="keywords"]');
     if (keywordsTag) {
-      const cleansedKeywords = cleanNull(keywordsTag.attr('content'));
+      const cleansedKeywords = cleanNull(keywordsTag?.attr('content'));
       if (cleansedKeywords) {
-        return cleansedKeywords.trim();
+        return cleansedKeywords?.trim();
       }
     }
     return '';
   },
   lang: (doc: any) => {
-    let language = doc('html').attr('lang');
+    let language = doc('html')?.attr('lang');
     if (!language) {
       const tag =
         doc('meta[name=lang]') || doc('meta[http-equiv=content-language]');
-      language = tag.attr('content');
+      language = tag?.attr('content');
     }
 
     if (language) {
@@ -709,10 +710,10 @@ const extractor = {
     );
     if (publisherCandidates) {
       const cleanedPublisher = cleanNull(
-        publisherCandidates.first().attr('content')
+        publisherCandidates?.first()?.attr('content')
       );
       if (cleanedPublisher) {
-        return cleanedPublisher.trim();
+        return cleanedPublisher?.trim();
       }
     }
     return null;
@@ -722,7 +723,7 @@ const extractor = {
       "meta[property='og:site_name'], meta[itemprop=name]"
     );
     if (siteNameTag) {
-      const cleanedSiteName = cleanNull(siteNameTag.first().attr('content'));
+      const cleanedSiteName = cleanNull(siteNameTag?.first()?.attr('content'));
       if (cleanedSiteName) {
         return cleanedSiteName.trim();
       }
@@ -775,9 +776,9 @@ const extractor = {
   type: (doc: any) => {
     const typeTag = doc("meta[name=type], meta[property='og:type']");
     if (typeTag) {
-      const cleanedType = cleanNull(typeTag.first().attr('content'));
+      const cleanedType = cleanNull(typeTag?.first()?.attr('content'));
       if (cleanedType) {
-        return cleanedType.trim();
+        return cleanedType?.trim();
       }
     }
     return '';
