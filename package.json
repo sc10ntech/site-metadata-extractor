@@ -5,7 +5,7 @@
   "main": "index.ts",
   "scripts": {
     "compile": "tsc",
-    "lint": "tslint \"src/**/*.ts\"",
+    "lint": "eslint src/**/*.ts",
     "test": "npm run test"
   },
   "repository": {
@@ -42,15 +42,45 @@
     "@types/node": "^12.7.2",
     "@types/validator": "^10.11.3",
     "@types/xregexp": "^3.0.30",
+    "@typescript-eslint/eslint-plugin": "^2.3.3",
+    "@typescript-eslint/parser": "^2.3.3",
+    "eslint": "^6.5.1",
+    "eslint-config-prettier": "^6.4.0",
+    "eslint-plugin-prettier": "^3.1.1",
     "husky": "^3.0.4",
     "jest": "^24.9.0",
     "prettier": "^1.18.2",
-    "ts-jest": "^24.0.2",
-    "tslint": "^5.19.0",
-    "tslint-config-prettier": "^1.18.0",
-    "tslint-plugin-prettier": "^2.0.1",
-    "typescript": "^3.5.3"
+    "typescript": "^3.7.0-beta"
   },
+  "eslintConfig": {
+    "env": {
+      "protractor": true
+    },
+    "extends": [
+      "prettier"
+    ],
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+      "ecmaVersion": 9,
+      "sourceType": "module"
+    },
+    "plugins": [
+      "@typescript-eslint",
+      "prettier"
+    ],
+    "rules": {
+      "array-bracket-spacing": "error",
+      "new-cap": "off",
+      "prettier/prettier": "error",
+      "sort-keys": "off",
+      "space-infix-ops": "error"
+    }
+  },
+  "eslintIgnore": [
+    "/build",
+    "/docs",
+    "/node_modules"
+  ],
   "husky": {
     "hooks": {
       "pre-commit": "npm run lint"
