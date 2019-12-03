@@ -640,6 +640,7 @@ const extractor = {
         }
       } catch (e) {
         console.log(`Error in jsonld parse - ${e}`);
+        return;
       }
       return jsonldData;
     }
