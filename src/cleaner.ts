@@ -56,7 +56,7 @@ function cleanErrantLineBreaks(doc: any) {
 
     doc(contents).each((_cindex: number, cElement: any) => {
       const contentsNode = doc(cElement);
-      if (contentsNode[0].type === 'text') {
+      if (contentsNode && contentsNode[0] && contentsNode[0].type === 'text') {
         contentsNode.replaceWith(
           contentsNode.text().replace(/([^\n])\n([^\n])/g, '$1 $2')
         );
