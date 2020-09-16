@@ -30,7 +30,7 @@
     "cheerio": "^1.0.0-rc.3",
     "dompurify": "^2.0.7",
     "is-absolute-url": "^3.0.3",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.20",
     "validator": "^11.1.0",
     "xregexp": "^4.2.4"
   },
