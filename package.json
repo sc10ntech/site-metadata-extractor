@@ -32,7 +32,7 @@
     "is-absolute-url": "^3.0.3",
     "lodash": "^4.17.15",
     "validator": "^11.1.0",
-    "xregexp": "^4.2.4"
+    "xregexp": "^4.3.0"
   },
   "devDependencies": {
     "@types/cheerio": "^0.22.14",
