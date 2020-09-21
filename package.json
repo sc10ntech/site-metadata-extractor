@@ -31,7 +31,7 @@
     "dompurify": "^2.0.7",
     "is-absolute-url": "^3.0.3",
     "lodash": "^4.17.15",
-    "validator": "^11.1.0",
+    "validator": "^13.1.17",
     "xregexp": "^4.2.4"
   },
   "devDependencies": {
