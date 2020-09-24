@@ -35,7 +35,7 @@
     "xregexp": "^4.2.4"
   },
   "devDependencies": {
-    "@types/cheerio": "^0.22.14",
+    "@types/cheerio": "^0.22.22",
     "@types/dompurify": "0.0.33",
     "@types/jest": "^24.0.23",
     "@types/lodash": "^4.14.149",
