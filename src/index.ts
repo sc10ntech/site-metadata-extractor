@@ -1,19 +1,70 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import cheerio from 'cheerio';
+import { NewsArticle, Article } from 'schema-dts';
 import { URL } from 'url';
 
 import cleaner from './cleaner';
-import extractor from './extractor';
+import extractor, { LinkObj, VideoAttrs } from './extractor';
+
+export interface PageData {
+  author: string[];
+  canonicalLink: string;
+  copyright: string;
+  date: string;
+  description: string;
+  favicon: string;
+  image: string;
+  jsonld: NewsArticle | Article | null;
+  keywords: string;
+  lang: string;
+  links?: LinkObj[];
+  locale: string;
+  origin: string;
+  publisher: string;
+  siteName: string;
+  softTitle: string;
+  tags: string[];
+  text?: string;
+  title: string;
+  type: string;
+  videos?: VideoAttrs[];
+}
+
+export interface LazyExtractor {
+  author: () => string[];
+  canonicalLink: () => string;
+  copyright: () => string;
+  date: () => string;
+  description: () => string;
+  favicon: () => string;
+  image: () => string;
+  jsonld: () => NewsArticle | Article | null;
+  keywords: () => string;
+  lang: () => string;
+  links: () => LinkObj[];
+  locale: () => string;
+  origin: () => string;
+  publisher: () => string;
+  siteName: () => string;
+  softTitle: () => string;
+  tags: () => string[];
+  text: () => string;
+  title: () => string;
+  type: () => string;
+  videos: () => VideoAttrs[];
+}
 
 const extractLinkMetadata = (
   markup: string,
   resourceUrl: string,
-  lang: string = 'en'
-) => {
+  lang = 'en'
+): PageData => {
   const resourceUrlObj = new URL(resourceUrl);
   const doc = cheerio.load(markup, { xmlMode: true });
   const language = lang || extractor.lang(doc);
 
-  const pageData: any = {
+  const pageData: PageData = {
     author: extractor.author(doc),
     canonicalLink: extractor.canonicalLink(doc, resourceUrl),
     copyright: extractor.copyright(doc),
@@ -51,127 +102,134 @@ const extractLinkMetadata = (
 export default extractLinkMetadata;
 
 // Allow access to document properties with lazy evaluation
-export const lazy = (html: any, resourceUrl: string, language: string) => {
+export const lazy = (
+  html: string,
+  resourceUrl: string,
+  language: string
+): LazyExtractor => {
   const resourceUrlObj = new URL(resourceUrl);
 
   return {
     author: () => {
       const doc = getParsedDoc.call(global, html);
-      global.author = extractor.author(doc);
-      return global.author;
+      global.pageData.author = extractor.author(doc);
+      return global.pageData.author;
     },
     canonicalLink: () => {
       const doc = getParsedDoc.call(global, html);
-      global.canonicalLink = extractor.canonicalLink(doc, resourceUrl);
-      return global.canonicalLink;
+      global.pageData.canonicalLink = extractor.canonicalLink(doc, resourceUrl);
+      return global.pageData.canonicalLink;
     },
     copyright: () => {
       const doc = getParsedDoc.call(global, html);
-      global.copyright = extractor.copyright(doc);
-      return global.copyright;
+      global.pageData.copyright = extractor.copyright(doc);
+      return global.pageData.copyright;
     },
     date: () => {
       const doc = getParsedDoc.call(global, html);
-      global.date = extractor.date(doc);
-      return global.date;
+      global.pageData.date = extractor.date(doc);
+      return global.pageData.date;
     },
     description: () => {
       const doc = getParsedDoc.call(global, html);
-      global.description = extractor.description(doc);
-      return global.description;
+      global.pageData.description = extractor.description(doc);
+      return global.pageData.description;
     },
     favicon: () => {
       const doc = getParsedDoc.call(global, html);
-      global.favicon = extractor.favicon(doc, resourceUrlObj);
-      return global.favicon;
+      global.pageData.favicon = extractor.favicon(doc, resourceUrlObj);
+      return global.pageData.favicon;
     },
     image: () => {
       const doc = getParsedDoc.call(global, html);
-      global.image = extractor.image(doc);
-      return global.image;
+      global.pageData.image = extractor.image(doc);
+      return global.pageData.image;
     },
     jsonld: () => {
       const doc = getParsedDoc.call(global, html);
-      global.jsonld = extractor.jsonld(doc);
-      return global.jsonld;
+      global.pageData.jsonld = extractor.jsonld(doc);
+      return global.pageData.jsonld;
     },
     keywords: () => {
       const doc = getParsedDoc.call(global, html);
-      global.keywords = extractor.keywords(doc);
-      return global.keywords;
+      global.pageData.keywords = extractor.keywords(doc);
+      return global.pageData.keywords;
     },
     lang: () => {
       const doc = getParsedDoc.call(global, html);
-      global.lang = language || extractor.lang(doc);
-      return global.lang;
+      global.pageData.lang = language || extractor.lang(doc);
+      return global.pageData.lang;
     },
     locale: () => {
       const doc = getParsedDoc.call(global, html);
-      global.locale = extractor.locale(doc);
-      return global.locale;
+      global.pageData.locale = extractor.locale(doc);
+      return global.pageData.locale;
     },
     links() {
-      if (!global.links) {
+      if (!global.pageData.links) {
         const doc = getParsedDoc.call(global, html);
         const topNode = getTopNode.call(global, doc, this.lang());
-        global.links = extractor.links(doc, topNode, this.lang());
-        return global.links;
+        global.pageData.links = extractor.links(doc, topNode, this.lang());
+        return global.pageData.links;
       }
+      return [];
     },
     origin: () => {
-      global.originUrl = resourceUrlObj.origin;
-      return global.originUrl;
+      global.pageData.origin = resourceUrlObj.origin;
+      return global.pageData.origin;
     },
     publisher: () => {
       const doc = getParsedDoc.call(global, html);
-      global.publisher = extractor.publisher(doc);
-      return global.publisher;
+      global.pageData.publisher = extractor.publisher(doc);
+      return global.pageData.publisher;
     },
     siteName: () => {
       const doc = getParsedDoc.call(global, html);
-      global.siteName = extractor.siteName(doc);
-      return global.siteName;
+      global.pageData.siteName = extractor.siteName(doc);
+      return global.pageData.siteName;
     },
     softTitle: () => {
       const doc = getParsedDoc.call(global, html);
-      global.softTitle = extractor.softTitle(doc);
-      return global.softTitle;
+      global.pageData.softTitle = extractor.softTitle(doc);
+      return global.pageData.softTitle;
     },
     tags: () => {
       const doc = getParsedDoc.call(global, html);
-      global.tags = extractor.tags(doc);
-      return global.tags;
+      global.pageData.tags = extractor.tags(doc);
+      return global.pageData.tags;
     },
     text() {
-      if (!global.text) {
+      if (!global.pageData.text) {
         const doc = getParsedDoc.call(global, html);
         const topNode = getTopNode.call(global, doc, this.lang());
-        global.text = extractor.text(doc, topNode, this.lang());
-        return global.text;
+        global.pageData.text = extractor.text(doc, topNode, this.lang());
+        return global.pageData.text;
       }
+      return '';
     },
     title: () => {
       const doc = getParsedDoc.call(global, html);
-      global.title = extractor.title(doc);
-      return global.title;
+      global.pageData.title = extractor.title(doc);
+      return global.pageData.title;
     },
     type: () => {
       const doc = getParsedDoc.call(global, html);
-      global.type = extractor.type(doc);
-      return global.type;
+      global.pageData.type = extractor.type(doc);
+      return global.pageData.type;
     },
     videos() {
-      if (!global.videos) {
+      if (!global.pageData.videos) {
         const doc = getParsedDoc.call(global, html);
         const topNode = getTopNode.call(global, doc, this.lang());
-        global.videos = extractor.videos(doc, topNode);
-        return global.videos;
+        global.pageData.videos = extractor.videos(doc, topNode);
+        return global.pageData.videos;
       }
+      return [];
     }
   };
 };
 
-function getCleanedDoc(html: any) {
+function getCleanedDoc(html: string): cheerio.Root {
   if (!global.cleanedDoc) {
     const doc = getParsedDoc.call(global, html);
     global.cleanedDoc = cleaner(doc);
@@ -179,10 +237,10 @@ function getCleanedDoc(html: any) {
   return global.cleanedDoc;
 }
 
-function getParsedDoc(html: any) {
-  global.doc = cheerio.load(html);
+function getParsedDoc(html: string): cheerio.Root {
+  return (global.doc = cheerio.load(html));
 }
 
-function getTopNode(doc: any, lang: any) {
-  global.topNode = extractor.calculateBestNode(doc, lang);
+function getTopNode(doc: cheerio.Root, lang: string): cheerio.Cheerio {
+  return (global.topNode = extractor.calculateBestNode(doc, lang));
 }
