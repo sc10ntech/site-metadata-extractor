@@ -60,8 +60,9 @@ typings/
 # next.js build output
 .next
 
-# typescript build output
+# typescript build / dist output
 build
+dist
 
 # .DS_Store
 .DS_Store

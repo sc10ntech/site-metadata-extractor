@@ -1,20 +1,26 @@
 {
   "compilerOptions": {
-    "allowJs": true,
     "esModuleInterop": true,
-    "incremental": true,
+    "declaration": true,
+    "declarationDir": "./dist",
     "inlineSources": true,
     "inlineSourceMap": true,
     "lib": [
-      "dom",
-      "es2018"
+      "DOM",
+      "DOM.Iterable",
+      "ES2018"
     ],
     "module": "commonjs",
     "moduleResolution": "node",
     "resolveJsonModule": true,
-    "outDir": "./build",
+    "outDir": "./dist",
     "target": "es2018",
     "strict": true
   },
-  "include": ["src/**/*"]
+  "typedocOptions": {
+    "mode": "modules",
+    "out": "docs"
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
 }
