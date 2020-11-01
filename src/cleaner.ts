@@ -1,6 +1,8 @@
-function cleanArticleTags(doc: any) {
+import cheerio from 'cheerio';
+
+function cleanArticleTags(doc: cheerio.Root) {
   const articles = doc('article');
-  articles.each((_index: number, element: any) => {
+  articles.each((_index: number, element: cheerio.Element) => {
     doc(element).removeAttr('id');
     doc(element).removeAttr('name');
     doc(element).removeAttr('class');
@@ -8,53 +10,57 @@ function cleanArticleTags(doc: any) {
   return doc;
 }
 
-function cleanBadTags(doc: any) {
+function cleanBadTags(doc: cheerio.Root) {
   const removeNodesRe =
     '^side$|combx|retweet|mediaarticlerelated|menucontainer|navbar|partner-gravity-ad|video-full-transcript|storytopbar-bucket|utility-bar|inline-share-tools|comment|PopularQuestions|contact|foot|footer|Footer|footnote|cnn_strycaptiontxt|cnn_html_slideshow|cnn_strylftcntnt|links|meta$|shoutbox|sponsor|tags|socialnetworking|socialNetworking|cnnStryHghLght|cnn_stryspcvbx|^inset$|pagetools|post-attributes|welcome_form|contentTools2|the_answers|communitypromo|runaroundLeft|subscribe|vcard|articleheadings|date|^print$|popup|author-dropdown|tools|socialtools|byline|konafilter|KonaFilter|breadcrumbs|^fn$|wp-caption-text|legende|ajoutVideo|timestamp|js_replies';
   const regex = new RegExp(removeNodesRe, 'i');
 
-  const toRemove = doc('*').filter((_index: number, element: any) => {
-    const idEl = doc(element).attr('id');
-    const classEl = doc(element).attr('class');
-    const nameEl = doc(element).attr('name');
-    if (!!idEl) {
-      return idEl.match(regex);
-    } else if (!!classEl) {
-      return classEl.match(regex);
-    } else if (!!nameEl) {
-      return nameEl.match(regex);
+  const toRemove = doc('*').filter((_index, el) => {
+    const idEl = doc(el).attr('id');
+    const classEl = doc(el).attr('class');
+    const nameEl = doc(el).attr('name');
+    if (idEl) {
+      return idEl.match(regex) !== null;
+    } else if (classEl) {
+      return classEl.match(regex) !== null;
+    } else if (nameEl) {
+      return nameEl.match(regex) !== null;
     }
+    return false;
   });
 
   doc(toRemove).remove();
   return doc;
 }
 
-function cleanCodeBlocks(doc: any) {
+function cleanCodeBlocks(doc: cheerio.Root) {
   const nodes = doc("[class*='highlight-'], pre code, code, pre, ul.task-list");
-  nodes.each((_index: number, element: any) => {
+  nodes.each((_index: number, element: cheerio.Element) => {
     doc(element).replaceWith(doc(element).text());
   });
   return doc;
 }
 
-function cleanEmTags(doc: any) {
+function cleanEmTags(doc: cheerio.Root) {
   const ems = doc('em');
-  ems.each((_index: number, element: any) => {
+  ems.each((_index: number, element: cheerio.Element) => {
     const images = ems.find('img');
     if (images.length === 0) {
-      doc(element).replaceWith(doc(element).html());
+      const htmlEl = doc(element).html();
+      if (htmlEl) {
+        doc(element).replaceWith(htmlEl);
+      }
     }
   });
   return doc;
 }
 
-function cleanErrantLineBreaks(doc: any) {
-  doc('p').each((_index: number, element: any) => {
+function cleanErrantLineBreaks(doc: cheerio.Root) {
+  doc('p').each((_index: number, element: cheerio.Element) => {
     const node = doc(element);
     const contents = node.contents();
 
-    doc(contents).each((_cindex: number, cElement: any) => {
+    doc(contents).each((_cindex: number, cElement: cheerio.Element) => {
       const contentsNode = doc(cElement);
       if (contentsNode && contentsNode[0] && contentsNode[0].type === 'text') {
         contentsNode.replaceWith(
@@ -66,25 +72,30 @@ function cleanErrantLineBreaks(doc: any) {
   return doc;
 }
 
-function cleanParaSpans(doc: any) {
+function cleanParaSpans(doc: cheerio.Root) {
   const nodes = doc('p span');
-  nodes.each((_index: number, element: any) => {
-    doc(element).replaceWith(doc(element).html());
+  nodes.each((_index: number, element: cheerio.Element) => {
+    const htmlEl = doc(element).html();
+    if (htmlEl) {
+      doc(element).replaceWith(htmlEl);
+    }
   });
   return doc;
 }
 
-function cleanUnderlines(doc: any) {
+function cleanUnderlines(doc: cheerio.Root) {
   const nodes = doc('u');
-  nodes.each((_index: number, element: any) => {
-    doc(element).replaceWith(doc(element).html());
+  nodes.each((_index: number, element: cheerio.Element) => {
+    const htmlEl = doc(element).html();
+    if (htmlEl) {
+      doc(element).replaceWith(htmlEl);
+    }
   });
   return doc;
 }
 
-function divToPara(doc: any, domType: any) {
+function divToPara(doc: cheerio.Root, domType: string) {
   const divs = doc(domType);
-  const lastCount = divs.length + 1;
 
   const tags = [
     'a',
@@ -99,7 +110,7 @@ function divToPara(doc: any, domType: any) {
     'ul'
   ];
 
-  divs.each((_index: number, element: any) => {
+  divs.each((_index: number, element: cheerio.Element) => {
     const div = doc(element);
     const items = div.find(tags.join(', '));
 
@@ -109,8 +120,8 @@ function divToPara(doc: any, domType: any) {
       const replaceNodes = getReplacementNodes(doc, div);
 
       let html = '';
-      replaceNodes.forEach((node: any) => {
-        if (node !== '') {
+      replaceNodes.forEach((node) => {
+        if (node.text() !== '') {
           html += `<p>${node}</p>`;
         }
       });
@@ -122,20 +133,29 @@ function divToPara(doc: any, domType: any) {
   return doc;
 }
 
-function getReplacementNodes(doc: any, div: any) {
+function getReplacementNodes(
+  doc: cheerio.Root,
+  div: cheerio.Cheerio
+): cheerio.Cheerio[] {
   let replacementText: string[] = [];
-  const nodesToReturn: any = [];
-  const nodesToRemove: any = [];
+  const nodesToReturn: cheerio.Cheerio[] = [];
+  const nodesToRemove: cheerio.Cheerio[] = [];
   const children = div.contents();
 
-  children.each((_index: number, element: any) => {
+  children.each((_index: number, element: cheerio.Element) => {
     const child = doc(element);
 
     if (child[0] && child[0].name === 'p' && replacementText.length > 0) {
       const text = replacementText.join('');
-      nodesToReturn.push(text);
+      const textNodeLoad = cheerio.load(`<p>${text}</p>`);
+      const textNode = doc(textNodeLoad);
+      // create a node out of text and push
+      nodesToReturn.push(textNode);
       replacementText = [];
-      nodesToReturn.push(doc(child).html());
+      const childEl = doc(element);
+      if (childEl) {
+        nodesToReturn.push(childEl);
+      }
     } else if (child[0] && child[0].type === 'text') {
       const childTextNode = child;
       const childText = child.text();
@@ -176,72 +196,83 @@ function getReplacementNodes(doc: any, div: any) {
       }
       // otherwise
     } else {
-      nodesToReturn.push(doc(child).html());
+      const childEl = doc(child);
+      if (childEl) {
+        nodesToReturn.push(childEl);
+      }
     }
   });
 
   // flush out anything still remaining
   if (replacementText.length > 0) {
     const text = replacementText.join('');
-    nodesToReturn.push(text);
+    const textNodeLoad = cheerio.load(`<p>${text}</p>`);
+    const textNode = doc(textNodeLoad);
+    nodesToReturn.push(textNode);
     replacementText = [];
   }
 
-  nodesToRemove.forEach((node: any) => {
+  nodesToRemove.forEach((node: cheerio.Cheerio) => {
     doc(node).remove();
   });
 
   return nodesToReturn;
 }
 
-function removeBodyClasses(doc: any) {
+function removeBodyClasses(doc: cheerio.Root): cheerio.Root {
   doc('body').removeClass();
   return doc;
 }
 
-function removeDropCaps(doc: any) {
+function removeDropCaps(doc: cheerio.Root): cheerio.Root {
   const nodes = doc('span[class~=dropcap], span[class~=drop_cap]');
-  nodes.each((_index: number, element: any) => {
-    doc(element).replaceWith(doc(element).html());
+  nodes.each((_index: number, element: cheerio.Element) => {
+    const htmlEl = doc(element).html();
+    if (htmlEl) {
+      doc(element).replaceWith(htmlEl);
+    }
   });
   return doc;
 }
 
-function removeNodesRegex(doc: any, pattern: any) {
-  const toRemove = doc('div').filter((_index: number, element: any) => {
+function removeNodesRegex(doc: cheerio.Root, pattern: RegExp) {
+  const toRemove = doc('div').filter((_index, element) => {
     const idEl = doc(element).attr('id');
     const classEl = doc(element).attr('class');
-    if (!!idEl) {
-      return idEl.match(pattern);
-    } else if (!!classEl) {
-      return classEl.match(pattern);
+    if (idEl) {
+      return idEl.match(pattern) !== null;
+    } else if (classEl) {
+      return classEl.match(pattern) !== null;
     }
+    return false;
   });
-
   doc(toRemove).remove();
   return doc;
 }
 
-function removeScriptsStyles(doc: any) {
+function removeScriptsStyles(doc: cheerio.Root): cheerio.Root {
   doc('script').remove();
   doc('style').remove();
 
-  const comments = doc('*')
+  doc('*')
     .contents()
-    .filter((_index: number, element: any) => {
+    .filter((_index: number, element: cheerio.Element) => {
       return element.type === 'comment';
     });
 
   return doc;
 }
 
-function replaceWithPara(doc: any, div: any) {
+function replaceWithPara(
+  doc: cheerio.Root,
+  div: cheerio.Element
+): cheerio.Root {
   const divContent = doc(div).html();
   doc(div).replaceWith(`<p>${divContent}</p>`);
   return doc;
 }
 
-const cleaner = (doc: any) => {
+const cleaner = (doc: cheerio.Root): cheerio.Root => {
   removeBodyClasses(doc);
   cleanArticleTags(doc);
   cleanEmTags(doc);
