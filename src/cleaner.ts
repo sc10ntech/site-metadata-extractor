@@ -250,17 +250,17 @@ function removeNodesRegex(doc: cheerio.Root, pattern: RegExp) {
   return doc;
 }
 
-function removeScriptsStyles(doc: cheerio.Root): cheerio.Root {
+function removeScriptsStyles(doc: cheerio.Root): cheerio.Cheerio {
   doc('script').remove();
   doc('style').remove();
 
-  doc('*')
+  const comments = doc('*')
     .contents()
     .filter((_index: number, element: cheerio.Element) => {
       return element.type === 'comment';
     });
 
-  return doc;
+  return doc(comments).remove();
 }
 
 function replaceWithPara(
