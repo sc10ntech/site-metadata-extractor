@@ -1,14 +1,59 @@
-import isAbsoluteUrl from 'is-absolute-url';
-import { uniq } from 'lodash';
+import cheerio from 'cheerio';
+import isEqual from 'lodash/isEqual';
+import uniq from 'lodash/uniq';
+import { NewsArticle, Article } from 'schema-dts';
 import { URL } from 'url';
 import formatter, { replaceCharacters } from './formatter';
 import stopwords from './stopwords';
 
-function addSiblings(doc: any, topNode: any, lang: string) {
+export interface LinkObj {
+  href: string;
+  text: string;
+}
+
+export interface VideoAttrs {
+  height?: string;
+  src?: string;
+  width?: string;
+}
+
+export interface Extractor {
+  author: (doc: cheerio.Root) => string[];
+  calculateBestNode: (doc: cheerio.Root, lang: string) => cheerio.Cheerio;
+  canonicalLink: (doc: cheerio.Root, resourceUrl: string) => string;
+  copyright: (doc: cheerio.Root) => string;
+  date: (doc: cheerio.Root) => string;
+  description: (doc: cheerio.Root) => string;
+  favicon: (doc: cheerio.Root, resourceUrlObj: URL) => string;
+  image: (doc: cheerio.Root) => string;
+  jsonld: (doc: cheerio.Root) => NewsArticle | Article | null;
+  keywords: (doc: cheerio.Root) => string;
+  lang: (doc: cheerio.Root) => string;
+  links: (
+    doc: cheerio.Root,
+    topNode: cheerio.Cheerio,
+    lang: string
+  ) => LinkObj[];
+  locale: (doc: cheerio.Root) => string;
+  publisher: (doc: cheerio.Root) => string;
+  siteName: (doc: cheerio.Root) => string;
+  softTitle: (doc: cheerio.Root) => string;
+  tags: (doc: cheerio.Root) => string[];
+  text: (doc: cheerio.Root, topNode: cheerio.Cheerio, lang: string) => string;
+  title: (doc: cheerio.Root) => string;
+  type: (doc: cheerio.Root) => string;
+  videos: (doc: cheerio.Root, topNode: cheerio.Cheerio) => VideoAttrs[];
+}
+
+function addSiblings(
+  doc: cheerio.Root,
+  topNode: cheerio.Cheerio,
+  lang: string
+): cheerio.Cheerio {
   const baselineScoreSiblingsPara = getSiblingsScore(doc, topNode, lang);
   const sibs = topNode.prevAll();
 
-  sibs.each((_index: number, element: any) => {
+  sibs.each((_index: number, element: cheerio.Element) => {
     const currentNode = doc(element);
     const ps = getSiblingsContent(
       doc,
@@ -18,11 +63,12 @@ function addSiblings(doc: any, topNode: any, lang: string) {
     );
 
     if (ps) {
-      ps.forEach(p => {
-        topNode.prepend('<p>#{p}</p>');
+      ps.forEach((p: cheerio.Cheerio | string) => {
+        topNode.prepend(`<p>${p}</p>`);
       });
     }
   });
+
   return topNode;
 }
 
@@ -42,14 +88,14 @@ function biggestTitleChunk(title: string, splitter: string) {
   return titlePieces[largeTextIndex];
 }
 
-function cleanNull(text: string) {
+function cleanNull(text: string | undefined): string {
   if (text) {
     return text.replace(/^null$/g, '');
   }
   return '';
 }
 
-function cleanText(text: string) {
+function cleanText(text: string): string {
   if (text) {
     return text
       .replace(/[\r\n\t]/g, ' ')
@@ -61,20 +107,35 @@ function cleanText(text: string) {
   return text;
 }
 
-function cleanTitle(title: string, delimiters: string[]) {
+function cleanTitle(title: string, delimiters: string[]): string {
   let titleText = title || '';
   let usedDelimiter = false;
 
-  delimiters.forEach(char => {
+  delimiters.forEach((char) => {
     if (titleText.indexOf(char) >= 0 && !usedDelimiter) {
       titleText = biggestTitleChunk(titleText, char);
       usedDelimiter = true;
     }
   });
+
   return cleanText(titleText);
 }
 
-function getObjectTag(doc: any, node: any) {
+function doesNodeListContainNode(
+  list: cheerio.Cheerio[],
+  node: cheerio.Cheerio
+): boolean {
+  let contains = false;
+  for (let i = 0; i < list.length; i++) {
+    const nodeToCompare = list[i];
+    if (isEqual(node, nodeToCompare)) {
+      contains = true;
+    }
+  }
+  return contains;
+}
+
+function getObjectTag(doc: cheerio.Root, node: cheerio.Cheerio) {
   const srcNode = node.find('param[name=movie]');
   if (srcNode.length > 0) {
     const src = srcNode.attr('value');
@@ -82,14 +143,14 @@ function getObjectTag(doc: any, node: any) {
     video.src = src;
     return video;
   }
-  return null;
+  return {};
 }
 
 function getSiblingsContent(
-  doc: any,
+  doc: cheerio.Root,
   lang: string,
-  currentSibling: any,
-  baselineScoreSiblingsPara: any
+  currentSibling: cheerio.Cheerio,
+  baselineScoreSiblingsPara: number
 ) {
   if (currentSibling[0].name === 'p' && currentSibling.text().length > 0) {
     return [currentSibling];
@@ -99,7 +160,7 @@ function getSiblingsContent(
       return null;
     } else {
       const ps: string[] = [];
-      potentialParagraphs.each((_index: number, element: any) => {
+      potentialParagraphs.each((_index: number, element: cheerio.Element) => {
         const firstParagraph = doc(element);
         const text = firstParagraph.text();
 
@@ -120,13 +181,17 @@ function getSiblingsContent(
   }
 }
 
-function getSiblingsScore(doc: any, topNode: any, lang: string) {
+function getSiblingsScore(
+  doc: cheerio.Root,
+  topNode: cheerio.Cheerio,
+  lang: string
+): number {
   const nodesToCheck = topNode.find('p');
   let base = 100000;
   let paragraphsNumber = 0;
   let paragraphScore = 0;
 
-  nodesToCheck.each((_index: number, element: any) => {
+  nodesToCheck.each((_index: number, element: cheerio.Element) => {
     const node = doc(element);
     const textNode = node.text();
     const wordStats = stopwords(textNode, lang);
@@ -144,7 +209,7 @@ function getSiblingsScore(doc: any, topNode: any, lang: string) {
   return base;
 }
 
-function getScore(node: any) {
+function getScore(node: cheerio.Cheerio): number {
   const gravityScoreString = node.attr('gravityScore');
   if (!gravityScoreString) {
     return 0;
@@ -153,7 +218,7 @@ function getScore(node: any) {
   }
 }
 
-function getVideoAttrs(doc: any, node: any) {
+function getVideoAttrs(doc: cheerio.Root, node: cheerio.Cheerio): VideoAttrs {
   const el = doc(node);
   return {
     height: el.attr('height'),
@@ -162,7 +227,26 @@ function getVideoAttrs(doc: any, node: any) {
   };
 }
 
-function isBoostable(doc: any, node: any, lang: string) {
+function isAbsoluteUrl(url: string): boolean {
+  if (typeof url !== 'string') {
+    throw new TypeError(`Expected a \`string\`, got \`${typeof url}\``);
+  }
+
+  // Don't match Windows paths `c:\`
+  if (/^[a-zA-Z]:\\/.test(url)) {
+    return false;
+  }
+
+  // Scheme: https://tools.ietf.org/html/rfc3986#section-3.1
+  // Absolute URL: https://tools.ietf.org/html/rfc3986#section-4.3
+  return /^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(url);
+}
+
+function isBoostable(
+  doc: cheerio.Root,
+  node: cheerio.Cheerio,
+  lang: string
+): boolean {
   const minimumStopWordCount = 5;
   const maxStepsAwayFromNode = 3;
   let stepsAway = 0;
@@ -170,7 +254,7 @@ function isBoostable(doc: any, node: any, lang: string) {
   const nodes = node.prevAll();
   let boostable = false;
 
-  nodes.each((_index: number, element: any) => {
+  nodes.each((_index: number, element: cheerio.Element) => {
     const currentNode = doc(element);
     const currentNodeTag = currentNode[0].name;
 
@@ -195,7 +279,7 @@ function isBoostable(doc: any, node: any, lang: string) {
   return boostable;
 }
 
-function isHighLinkDensity(doc: any, node: any) {
+function isHighLinkDensity(doc: cheerio.Root, node: cheerio.Cheerio): boolean {
   const links = node.find('a');
   if (links.length > 0) {
     const text = node.text();
@@ -203,7 +287,7 @@ function isHighLinkDensity(doc: any, node: any) {
     const numberOfWords = words.length;
 
     const sb: string[] = [];
-    links.each((_index: number, element: any) => {
+    links.each((_index: number, element: cheerio.Element) => {
       sb.push(doc(element).text());
     });
 
@@ -221,7 +305,11 @@ function isHighLinkDensity(doc: any, node: any) {
   return false;
 }
 
-function isNodeScoreThresholdMet(_doc: any, node: any, e: any) {
+function isNodeScoreThresholdMet(
+  _doc: cheerio.Root,
+  node: cheerio.Cheerio,
+  e: cheerio.Cheerio
+): boolean {
   const topNodeScore = getScore(node);
   const currentNodeScore = getScore(e);
   const thresholdScore = topNodeScore * 0.08;
@@ -236,10 +324,10 @@ function isNodeScoreThresholdMet(_doc: any, node: any, e: any) {
   return true;
 }
 
-function isTableAndNoParaExist(doc: any, e: any) {
+function isTableAndNoParaExist(doc: cheerio.Root, e: cheerio.Cheerio): boolean {
   const subParagraphs = e.find('p');
 
-  subParagraphs.each((_index: number, element: any) => {
+  subParagraphs.each((_index: number, element: cheerio.Element) => {
     const p = doc(element);
     const text = p.text();
 
@@ -256,15 +344,19 @@ function isTableAndNoParaExist(doc: any, e: any) {
   return false;
 }
 
-function isValidDate(d: any) {
+function isValidDate(d: string): boolean {
   const parsedDate = Date.parse(d);
   return new Date(d).toString() !== 'Invalid Date' && !isNaN(parsedDate);
 }
 
-function postCleanup(doc: any, targetNode: any, lang: any) {
+function postCleanup(
+  doc: cheerio.Root,
+  targetNode: cheerio.Cheerio,
+  lang: string
+): cheerio.Cheerio {
   const node = addSiblings(doc, targetNode, lang);
 
-  node.children().each((_index: number, element: any) => {
+  node.children().each((_index: number, element: cheerio.Element) => {
     const el = doc(element);
     const elTag = el[0].name;
     if (!['p', 'a'].includes(elTag)) {
@@ -277,30 +369,21 @@ function postCleanup(doc: any, targetNode: any, lang: any) {
       }
     }
   });
+
   return node;
 }
 
-function rawTitle(doc: any) {
+function rawTitle(doc: cheerio.Root) {
   let gotTitle = false;
   let titleText = '';
 
   [
-    doc('meta[property="og:title"]')
-      .first()
-      .attr('content'),
-    doc('h1[class*="title"]')
-      .first()
-      .text(),
-    doc('title')
-      .first()
-      .text(),
-    doc('h1')
-      .first()
-      .text(),
-    doc('h2')
-      .first()
-      .text()
-  ].forEach(candidate => {
+    doc('meta[property="og:title"]').first().attr('content'),
+    doc('h1[class*="title"]').first().text(),
+    doc('title').first().text(),
+    doc('h1').first().text(),
+    doc('h2').first().text()
+  ].forEach((candidate) => {
     if (candidate && candidate.trim() && !gotTitle) {
       titleText = candidate.trim();
       gotTitle = true;
@@ -309,7 +392,7 @@ function rawTitle(doc: any) {
   return titleText;
 }
 
-function updateNodeCount(node: any, addToCount: number) {
+function updateNodeCount(node: cheerio.Cheerio, addToCount: number): void {
   const countString = node.attr('gravityNodes');
   let currentScore = 0;
 
@@ -318,10 +401,10 @@ function updateNodeCount(node: any, addToCount: number) {
   }
 
   const newScore = currentScore + addToCount;
-  node.attr('gravityNodes', newScore);
+  node.attr('gravityNodes', `${newScore}`);
 }
 
-function updateScore(node: any, addToScore: number) {
+function updateScore(node: cheerio.Cheerio, addToScore: number): void {
   const scoreString = node.attr('gravityScore');
   let currentScore = 0;
 
@@ -330,18 +413,18 @@ function updateScore(node: any, addToScore: number) {
   }
 
   const newScore = currentScore + addToScore;
-  node.attr('gravityScore', newScore);
+  node.attr('gravityScore', `${newScore}`);
 }
 
-const extractor = {
-  author: (doc: any) => {
+const extractor: Extractor = {
+  author: (doc: cheerio.Root): string[] => {
     const authorCandidates = doc(
       "meta[property='article:author'], meta[property='og:article:author'], meta[name='author'], meta[name='dcterms.creator'], meta[name='DC.creator'], meta[name='DC.Creator'], meta[name='dc.creator'], meta[name='creator']"
     );
 
     const authorList = [];
 
-    authorCandidates.each((_index: number, element: any) => {
+    authorCandidates.each((_index: number, element: cheerio.Element) => {
       const author = cleanNull(doc(element).attr('content'));
       if (author) {
         authorList.push(author.trim());
@@ -351,41 +434,29 @@ const extractor = {
     // fallback to a named author div
     if (authorList.length === 0) {
       const fallbackAuthor =
-        doc("span[class*='author']")
-          .first()
-          .text() ||
-        doc("p[class*='author']")
-          .first()
-          .text() ||
-        doc("div[class*='author']")
-          .first()
-          .text() ||
-        doc("span[class*='byline']")
-          .first()
-          .text() ||
-        doc("p[class*='byline']")
-          .first()
-          .text() ||
-        doc("div[class*='byline']")
-          .first()
-          .text();
+        doc("span[class*='author']").first().text() ||
+        doc("p[class*='author']").first().text() ||
+        doc("div[class*='author']").first().text() ||
+        doc("span[class*='byline']").first().text() ||
+        doc("p[class*='byline']").first().text() ||
+        doc("div[class*='byline']").first().text();
       if (fallbackAuthor) {
         authorList.push(cleanText(fallbackAuthor));
       }
     }
     return authorList;
   },
-  calculateBestNode: (doc: any, lang: string) => {
-    let topNode: any = null;
+  calculateBestNode: (doc: cheerio.Root, lang: string): cheerio.Cheerio => {
+    let topNode: cheerio.Cheerio = doc('');
     const nodesToCheck = doc('p, pre, td');
 
-    const parentNodes: object[] = [];
-    const nodesWithText: object[] = [];
+    const parentNodes: cheerio.Cheerio[] = [];
+    const nodesWithText: cheerio.Cheerio[] = [];
     let startingBoost = 1.0;
     let cnt = 0;
     let i = 0;
 
-    nodesToCheck.each((_index: number, element: any) => {
+    nodesToCheck.each((_index: number, element: cheerio.Element) => {
       const node = doc(element);
 
       const textNode = node.text();
@@ -401,7 +472,7 @@ const extractor = {
     const bottomNegativeScoreNodes = nodesNumber * 0.25;
     const negativeScoring = 0;
 
-    nodesWithText.forEach((node: any) => {
+    nodesWithText.forEach((node: cheerio.Cheerio) => {
       let boostScore = 0.0;
 
       if (isBoostable(doc, node, lang) === true) {
@@ -431,18 +502,26 @@ const extractor = {
       updateScore(parentNode, upScore);
       updateNodeCount(parentNode, 1);
 
-      if (parentNodes.indexOf(parentNode[0]) === -1) {
-        parentNodes.push(parentNode[0]);
+      if (!doesNodeListContainNode(parentNodes, parentNode)) {
+        parentNodes.push(parentNode);
       }
+
+      // if (parentNodes.indexOf(parentNode[0]) === -1) {
+      //   parentNodes.push(parentNode[0]);
+      // }
 
       const parentParentNode = parentNode.parent();
       if (parentParentNode) {
         updateScore(parentParentNode, upScore / 2);
         updateNodeCount(parentParentNode, 1);
 
-        if (parentNodes.indexOf(parentParentNode[0]) === -1) {
-          parentNodes.push(parentParentNode[0]);
+        if (!doesNodeListContainNode(parentNodes, parentParentNode)) {
+          parentNodes.push(parentParentNode);
         }
+
+        // if (parentNodes.indexOf(parentParentNode[0]) === -1) {
+        //   parentNodes.push(parentParentNode[0]);
+        // }
       }
 
       cnt += 1;
@@ -451,7 +530,7 @@ const extractor = {
 
     let topNodeScore = 0;
 
-    parentNodes.forEach(el => {
+    parentNodes.forEach((el) => {
       const score = getScore(doc(el));
 
       if (score > topNodeScore) {
@@ -467,7 +546,7 @@ const extractor = {
     return doc(topNode);
   },
   // if it gets to the end without one of these links or meta tags, return the original url as canonical
-  canonicalLink: (doc: any, resourceUrl: any) => {
+  canonicalLink: (doc: cheerio.Root, resourceUrl: string): string => {
     const canonicalLinkTag = doc(
       "link[rel='canonical'], meta[property='og:url']"
     );
@@ -500,7 +579,7 @@ const extractor = {
     // return original url
     return resourceUrl;
   },
-  copyright: (doc: any) => {
+  copyright: (doc: cheerio.Root): string => {
     const copyrightCandidates = doc(
       "p[class*='copyright'], div[class*='copyright'], span[class*='copyright'], li[class*='copyright'], p[id*='copyright'], div[id*='copyright'], span[id*='copyright'], li[id*='copyright']"
     );
@@ -516,9 +595,9 @@ const extractor = {
         return cleanText(copyright);
       }
     }
-    return null;
+    return '';
   },
-  date(doc: any) {
+  date: (doc: cheerio.Root): string => {
     const dateCandidates = doc(
       "meta[property='article:published_time'], \
     meta[itemprop*='datePublished'], meta[name='dcterms.modified'], \
@@ -545,7 +624,7 @@ const extractor = {
     div[class*='date']"
     );
 
-    let dateToReturn;
+    let dateToReturn = '';
 
     if (dateCandidates) {
       const dateContentCandidate = cleanNull(
@@ -565,22 +644,13 @@ const extractor = {
       }
     }
 
-    const jsonldData = this.jsonld(doc);
-    if (jsonldData) {
-      if (jsonldData.NewsArticle) {
-        dateToReturn = jsonldData.NewsArticle[0].datePublished.trim();
-      } else if (jsonldData.Article) {
-        dateToReturn = jsonldData.Article[0].datePublished.trim();
-      }
-    }
-
     if (isValidDate(dateToReturn)) {
       return dateToReturn;
     }
 
-    return null;
+    return dateToReturn;
   },
-  description: (doc: any) => {
+  description: (doc: cheerio.Root): string => {
     const descriptionTag = doc(
       "meta[name=description], meta[property='og:description']"
     );
@@ -594,16 +664,11 @@ const extractor = {
     }
     return '';
   },
-  favicon: (doc: any, resourceUrlObj: any) => {
-    const tag = doc('link').filter((_index: number, element: any) => {
-      if (doc(element).attr('rel')) {
-        return doc(element)
-          .attr('rel')
-          .toLowerCase()
-          .includes('icon');
-      }
-    });
-    const faviconLink = tag.attr('href');
+  favicon: (doc: cheerio.Root, resourceUrlObj: URL): string => {
+    const tag = doc('link').filter(
+      (_index, el) => doc(el).attr('rel')?.toLowerCase() == 'shortcut icon'
+    );
+    const faviconLink = tag.attr('href') || '';
     // ensure the url returned from favicon is absolute url
     if (faviconLink && !isAbsoluteUrl(faviconLink)) {
       // add the origin to the faviconLink
@@ -611,7 +676,7 @@ const extractor = {
     }
     return faviconLink;
   },
-  image: (doc: any) => {
+  image: (doc: cheerio.Root): string => {
     const images = doc(
       "meta[property='og:image'], meta[property='og:image:url'], meta[itemprop=image], meta[name='twitter:image:src'], meta[name='twitter:image'], meta[name='twitter:image0']"
     );
@@ -620,32 +685,27 @@ const extractor = {
       const cleanedImages = cleanNull(images.first().attr('content')) || '';
       return cleanedImages.trim();
     }
-    return null;
+    return '';
   },
-  jsonld: (doc: any) => {
-    const jsonldData: any = {};
+  jsonld: (doc: cheerio.Root): NewsArticle | Article | null => {
     const jsonldTag = doc('script[type="application/ld+json"]');
     if (jsonldTag) {
+      // convert jsonldTag to html
+      const jsonldObj = jsonldTag.html() || '';
       try {
-        let parsedJSON = JSON.parse(jsonldTag.html());
+        const parsedJSON: NewsArticle | Article = JSON.parse(jsonldObj);
         if (parsedJSON) {
           if (!Array.isArray(parsedJSON)) {
-            parsedJSON = [parsedJSON];
+            return parsedJSON;
           }
-          parsedJSON.forEach((obj: any) => {
-            const type = obj['@type'];
-            jsonldData[type] = jsonldData[type] || [];
-            jsonldData[type].push(obj);
-          });
         }
       } catch (e) {
         console.log(`Error in jsonld parse - ${e}`);
-        return;
       }
-      return jsonldData;
     }
+    return null;
   },
-  keywords: (doc: any) => {
+  keywords: (doc: cheerio.Root): string => {
     const keywordsTag = doc('meta[name="keywords"]');
     if (keywordsTag) {
       const cleansedKeywords = cleanNull(keywordsTag.attr('content'));
@@ -655,7 +715,7 @@ const extractor = {
     }
     return '';
   },
-  lang: (doc: any) => {
+  lang: (doc: cheerio.Root): string => {
     let language = doc('html').attr('lang');
     if (!language) {
       const tag =
@@ -670,14 +730,18 @@ const extractor = {
         return value.toLowerCase();
       }
     }
-    return null;
+    return '';
   },
-  links: (doc: any, topNode: any, lang: string | undefined | null) => {
-    const links: object[] = [];
+  links: (
+    doc: cheerio.Root,
+    topNode: cheerio.Cheerio,
+    lang: string
+  ): LinkObj[] => {
+    const links: LinkObj[] = [];
 
     const gatherLinks = () => {
       const nodes = topNode.find('a');
-      nodes.each((_index: number, element: any) => {
+      nodes.each((_index: number, element: cheerio.Element) => {
         const href = doc(element).attr('href');
         const text = doc(element).html();
         if (href && text) {
@@ -695,7 +759,7 @@ const extractor = {
     }
     return links;
   },
-  locale: (doc: any) => {
+  locale: (doc: cheerio.Root): string => {
     const localeTag = doc("meta[property='og:locale']");
     if (localeTag) {
       const cleanedLocale = cleanNull(localeTag.first().attr('content'));
@@ -703,8 +767,9 @@ const extractor = {
         return cleanedLocale.trim();
       }
     }
+    return '';
   },
-  publisher: (doc: any) => {
+  publisher: (doc: cheerio.Root): string => {
     const publisherCandidates = doc(
       "meta[property='og:site_name'], meta[itemprop=name], meta[name='dc.publisher'], meta[name='DC.publisher'], meta[name='DC.Publisher']"
     );
@@ -716,9 +781,9 @@ const extractor = {
         return cleanedPublisher.trim();
       }
     }
-    return null;
+    return '';
   },
-  siteName: (doc: any) => {
+  siteName: (doc: cheerio.Root): string => {
     const siteNameTag = doc(
       "meta[property='og:site_name'], meta[itemprop=name]"
     );
@@ -728,13 +793,14 @@ const extractor = {
         return cleanedSiteName.trim();
       }
     }
+    return '';
   },
   // Grab the title with soft truncation
-  softTitle: (doc: any) => {
+  softTitle: (doc: cheerio.Root): string => {
     const titleText = rawTitle(doc);
     return cleanTitle(titleText, ['|', ' - ', '»']);
   },
-  tags: (doc: any) => {
+  tags: (doc: cheerio.Root): string[] => {
     let elements = doc("a[rel='tag']");
     if (elements.length === 0) {
       elements = doc(
@@ -746,7 +812,7 @@ const extractor = {
     }
 
     const tags: string[] = [];
-    elements.each((_index: number, element: any) => {
+    elements.each((_index: number, element: cheerio.Element) => {
       const tag = doc(element);
       const tagText = tag.text().trim();
       tagText.replace(/[\s\t\n]+/g, '');
@@ -758,7 +824,7 @@ const extractor = {
 
     return uniq(tags);
   },
-  text: (doc: any, topNode: any, lang: string | undefined | null) => {
+  text: (doc: cheerio.Root, topNode: cheerio.Cheerio, lang: string): string => {
     if (topNode) {
       topNode = postCleanup(doc, topNode, lang);
       return formatter(doc, topNode, lang);
@@ -768,12 +834,12 @@ const extractor = {
   },
   // Grab the title of an html doc (excluding junk)
   // Hard-truncates titles containing colon or spaced dash
-  title: (doc: any) => {
+  title: (doc: cheerio.Root): string => {
     const titleText = rawTitle(doc);
     const cleanedTitle = cleanTitle(titleText, ['|', ' - ', '»', ':']);
     return replaceCharacters(cleanedTitle, false, true);
   },
-  type: (doc: any) => {
+  type: (doc: cheerio.Root): string => {
     const typeTag = doc("meta[name=type], meta[property='og:type']");
     if (typeTag) {
       const cleanedType = cleanNull(typeTag.first().attr('content'));
@@ -783,11 +849,11 @@ const extractor = {
     }
     return '';
   },
-  videos: (doc: any, topNode: any) => {
-    const videolist: any = [];
+  videos: (doc: cheerio.Root, topNode: cheerio.Cheerio): VideoAttrs[] => {
+    const videolist: VideoAttrs[] = [];
     const videoCandidates = doc(topNode).find('iframe, embed, object, video');
 
-    videoCandidates.each((_index: number, element: any) => {
+    videoCandidates.each((_index: number, element: cheerio.Element) => {
       const candidate = doc(element);
       const tag = candidate[0].name;
 
@@ -805,11 +871,13 @@ const extractor = {
     });
 
     const urls: string[] = [];
-    const results: any = [];
-    videolist.forEach((vid: any) => {
-      if (vid && vid.height && vid.width && urls.indexOf(vid.src) === -1) {
-        results.push(vid);
-        urls.push(vid.src);
+    const results: VideoAttrs[] = [];
+    videolist.forEach((vid: VideoAttrs) => {
+      if (vid.src) {
+        if (vid && vid.height && vid.width && urls.indexOf(vid.src) === -1) {
+          results.push(vid);
+          urls.push(vid.src);
+        }
       }
     });
     return results;
