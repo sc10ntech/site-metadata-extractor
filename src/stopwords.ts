@@ -14,7 +14,7 @@ const candiateWords = (strippedInput: string): string[] => {
 };
 
 const getFilePath = (lang: string) => {
-  return path.resolve(`../data/stopwords/stopwords-${lang}.txt`);
+  return path.resolve(`./data/stopwords/stopwords-${lang}.txt`);
 };
 
 const removePunctuation = (content: string) => {
@@ -26,7 +26,7 @@ const stopwords = (content: string, lang = 'en'): StopWords => {
   let stopWords: string[];
 
   if (!fs.existsSync(filePath)) {
-    console.error(
+    console.warn(
       `WARNING: No stopwords file found for '${lang}' - defaulting to English!`
     );
     filePath = getFilePath('en');
