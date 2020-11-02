@@ -1,5 +1,5 @@
 import cheerio from 'cheerio';
-import { PageData } from './index';
+import { PageData } from '../index';
 
 declare global {
   namespace NodeJS {
