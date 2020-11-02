@@ -583,17 +583,18 @@ const extractor: Extractor = {
     const copyrightCandidates = doc(
       "p[class*='copyright'], div[class*='copyright'], span[class*='copyright'], li[class*='copyright'], p[id*='copyright'], div[id*='copyright'], span[id*='copyright'], li[id*='copyright']"
     );
-    let text = copyrightCandidates.first().text();
+    let text = copyrightCandidates?.first()?.text();
     if (!text) {
+      // try to find copyright in text
       text = doc('body')
         .text()
         .replace(/\s*[\r\n]+\s*/g, '. ');
-      if (text.indexOf('©') > 0) {
-        const copyright = text
-          .replace(/.*?©(\s*copyright)?([^,;:.|\r\n]+).*/gi, '$2')
-          .trim();
-        return cleanText(copyright);
-      }
+    }
+    if (text.indexOf('©') > -1) {
+      const copyright = text
+        .replace(/.*?©(\s*copyright)?([^,;:.|\r\n]+).*/gi, '$2')
+        .trim();
+      return cleanText(copyright);
     }
     return '';
   },
@@ -648,6 +649,12 @@ const extractor: Extractor = {
       return dateToReturn;
     }
 
+    // finally try jsonld date
+    const jsonldBlob = extractor.jsonld(doc);
+    if (jsonldBlob && jsonldBlob.datePublished) {
+      dateToReturn = jsonldBlob.datePublished as string;
+    }
+
     return dateToReturn;
   },
   description: (doc: cheerio.Root): string => {
@@ -666,7 +673,9 @@ const extractor: Extractor = {
   },
   favicon: (doc: cheerio.Root, resourceUrlObj: URL): string => {
     const tag = doc('link').filter(
-      (_index, el) => doc(el).attr('rel')?.toLowerCase() == 'shortcut icon'
+      (_index, el) =>
+        doc(el).attr('rel')?.toLowerCase() === 'shortcut icon' ||
+        doc(el).attr('rel')?.toLowerCase() === 'icon'
     );
     const faviconLink = tag.attr('href') || '';
     // ensure the url returned from favicon is absolute url
@@ -840,7 +849,7 @@ const extractor: Extractor = {
     return replaceCharacters(cleanedTitle, false, true);
   },
   type: (doc: cheerio.Root): string => {
-    const typeTag = doc("meta[name=type], meta[property='og:type']");
+    const typeTag = doc("meta[property='og:type']");
     if (typeTag) {
       const cleanedType = cleanNull(typeTag.first().attr('content'));
       if (cleanedType) {

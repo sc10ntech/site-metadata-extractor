@@ -105,7 +105,7 @@ export default extractLinkMetadata;
 export const lazy = (
   html: string,
   resourceUrl: string,
-  language: string
+  language = 'en'
 ): LazyExtractor => {
   const resourceUrlObj = new URL(resourceUrl);
 
