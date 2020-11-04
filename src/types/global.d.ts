@@ -6,7 +6,7 @@ declare global {
     interface Global {
       cleanedDoc: cheerio.Root;
       doc: cheerio.Root;
-      pageData: PageData;
+      lazyPageData: PageData;
       topNode: cheerio.Cheerio;
     }
   }

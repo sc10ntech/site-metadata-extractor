@@ -700,7 +700,7 @@ const extractor: Extractor = {
     const jsonldTag = doc('script[type="application/ld+json"]');
     if (jsonldTag) {
       // convert jsonldTag to html
-      const jsonldObj = jsonldTag.html() || '';
+      const jsonldObj = jsonldTag.html() || JSON.stringify('');
       try {
         const parsedJSON: NewsArticle | Article = JSON.parse(jsonldObj);
         if (parsedJSON) {
@@ -709,7 +709,7 @@ const extractor: Extractor = {
           }
         }
       } catch (e) {
-        console.log(`Error in jsonld parse - ${e}`);
+        console.error(`Error in jsonld parse - ${e}`);
       }
     }
     return null;

@@ -108,121 +108,125 @@ export const lazy = (
   language = 'en'
 ): LazyExtractor => {
   const resourceUrlObj = new URL(resourceUrl);
+  global.lazyPageData = global.lazyPageData || {};
 
   return {
     author: () => {
       const doc = getParsedDoc.call(global, html);
-      global.pageData.author = extractor.author(doc);
-      return global.pageData.author;
+      global.lazyPageData.author = extractor.author(doc);
+      return global.lazyPageData.author;
     },
     canonicalLink: () => {
       const doc = getParsedDoc.call(global, html);
-      global.pageData.canonicalLink = extractor.canonicalLink(doc, resourceUrl);
-      return global.pageData.canonicalLink;
+      global.lazyPageData.canonicalLink = extractor.canonicalLink(
+        doc,
+        resourceUrl
+      );
+      return global.lazyPageData.canonicalLink;
     },
     copyright: () => {
       const doc = getParsedDoc.call(global, html);
-      global.pageData.copyright = extractor.copyright(doc);
-      return global.pageData.copyright;
+      global.lazyPageData.copyright = extractor.copyright(doc);
+      return global.lazyPageData.copyright;
     },
     date: () => {
       const doc = getParsedDoc.call(global, html);
-      global.pageData.date = extractor.date(doc);
-      return global.pageData.date;
+      global.lazyPageData.date = extractor.date(doc);
+      return global.lazyPageData.date;
     },
     description: () => {
       const doc = getParsedDoc.call(global, html);
-      global.pageData.description = extractor.description(doc);
-      return global.pageData.description;
+      global.lazyPageData.description = extractor.description(doc);
+      return global.lazyPageData.description;
     },
     favicon: () => {
       const doc = getParsedDoc.call(global, html);
-      global.pageData.favicon = extractor.favicon(doc, resourceUrlObj);
-      return global.pageData.favicon;
+      global.lazyPageData.favicon = extractor.favicon(doc, resourceUrlObj);
+      return global.lazyPageData.favicon;
     },
     image: () => {
       const doc = getParsedDoc.call(global, html);
-      global.pageData.image = extractor.image(doc);
-      return global.pageData.image;
+      global.lazyPageData.image = extractor.image(doc);
+      return global.lazyPageData.image;
     },
     jsonld: () => {
       const doc = getParsedDoc.call(global, html);
-      global.pageData.jsonld = extractor.jsonld(doc);
-      return global.pageData.jsonld;
+      global.lazyPageData.jsonld = extractor.jsonld(doc);
+      return global.lazyPageData.jsonld;
     },
     keywords: () => {
       const doc = getParsedDoc.call(global, html);
-      global.pageData.keywords = extractor.keywords(doc);
-      return global.pageData.keywords;
+      global.lazyPageData.keywords = extractor.keywords(doc);
+      return global.lazyPageData.keywords;
     },
     lang: () => {
       const doc = getParsedDoc.call(global, html);
-      global.pageData.lang = language || extractor.lang(doc);
-      return global.pageData.lang;
+      global.lazyPageData.lang = language || extractor.lang(doc);
+      return global.lazyPageData.lang;
     },
     locale: () => {
       const doc = getParsedDoc.call(global, html);
-      global.pageData.locale = extractor.locale(doc);
-      return global.pageData.locale;
+      global.lazyPageData.locale = extractor.locale(doc);
+      return global.lazyPageData.locale;
     },
     links() {
-      if (!global.pageData.links) {
+      if (!global.lazyPageData.links) {
         const doc = getParsedDoc.call(global, html);
         const topNode = getTopNode.call(global, doc, this.lang());
-        global.pageData.links = extractor.links(doc, topNode, this.lang());
-        return global.pageData.links;
+        global.lazyPageData.links = extractor.links(doc, topNode, this.lang());
+        return global.lazyPageData.links;
       }
       return [];
     },
     origin: () => {
-      global.pageData.origin = resourceUrlObj.origin;
-      return global.pageData.origin;
+      global.lazyPageData.origin = resourceUrlObj.origin;
+      return global.lazyPageData.origin;
     },
     publisher: () => {
       const doc = getParsedDoc.call(global, html);
-      global.pageData.publisher = extractor.publisher(doc);
-      return global.pageData.publisher;
+      global.lazyPageData.publisher = extractor.publisher(doc);
+      return global.lazyPageData.publisher;
     },
     siteName: () => {
       const doc = getParsedDoc.call(global, html);
-      global.pageData.siteName = extractor.siteName(doc);
-      return global.pageData.siteName;
+      global.lazyPageData.siteName = extractor.siteName(doc);
+      return global.lazyPageData.siteName;
     },
     softTitle: () => {
       const doc = getParsedDoc.call(global, html);
-      global.pageData.softTitle = extractor.softTitle(doc);
-      return global.pageData.softTitle;
+      global.lazyPageData.softTitle = extractor.softTitle(doc);
+      return global.lazyPageData.softTitle;
     },
     tags: () => {
       const doc = getParsedDoc.call(global, html);
-      global.pageData.tags = extractor.tags(doc);
-      return global.pageData.tags;
+      global.lazyPageData.tags = extractor.tags(doc);
+      return global.lazyPageData.tags;
     },
     text() {
-      if (!global.pageData.text) {
+      if (!global.lazyPageData.text) {
         const doc = getParsedDoc.call(global, html);
         const topNode = getTopNode.call(global, doc, this.lang());
-        global.pageData.text = extractor.text(doc, topNode, this.lang());
-        return global.pageData.text;
+        global.lazyPageData.text = extractor.text(doc, topNode, this.lang());
+        return global.lazyPageData.text;
       }
       return '';
     },
     title: () => {
       const doc = getParsedDoc.call(global, html);
-      global.pageData.title = extractor.title(doc);
-      return global.pageData.title;
+      global.lazyPageData.title = extractor.title(doc);
+      return global.lazyPageData.title;
     },
     type: () => {
       const doc = getParsedDoc.call(global, html);
-      global.pageData.type = extractor.type(doc);
-      return global.pageData.type;
+      global.lazyPageData.type = extractor.type(doc);
+      return global.lazyPageData.type;
     },
     videos() {
-      if (!global.pageData.videos) {
+      if (!global.lazyPageData.videos) {
         const doc = getParsedDoc.call(global, html);
         const topNode = getTopNode.call(global, doc, this.lang());
-        global.pageData.videos = extractor.videos(doc, topNode);
-        return global.pageData.videos;
+        global.lazyPageData.videos = extractor.videos(doc, topNode);
+        return global.lazyPageData.videos;
       }
       return [];
     }
