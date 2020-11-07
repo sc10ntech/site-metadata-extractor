@@ -1,0 +1,77 @@
+{
+  "@context": "https://schema.org",
+  "@type": "NewsArticle",
+  "description": "People start a business while working full-time for a lot of reasons, but mainly it's the money. ",
+  "speakable": {
+    "@type": "SpeakableSpecification",
+    "xpath": [
+      "/html/head/title",
+      "/html/head/meta[@name=\"description\"]/@content",
+      "//div[contains(@class, \"group\")][1]/p"
+    ]
+  },
+  "mainEntityOfPage": "https://www.cnbc.com/2018/09/28/people-start-a-second-business-for-a-lot-of-reasons-but-mostly-its-this-one.html",
+  "url": "https://www.cnbc.com/2018/09/28/people-start-a-second-business-for-a-lot-of-reasons-but-mostly-its-this-one.html",
+  "headline": "The top reason people start a side business may not be what you think ",
+  "dateCreated": "2018-09-28T18:07:22+0000",
+  "datePublished": "2018-09-28T18:07:22+0000",
+  "dateModified": "2018-09-28T18:14:30+0000",
+  "author": { "@type": "Person", "name": "Jill Cornfield" },
+  "creator": ["Jill Cornfield"],
+  "publisher": {
+    "@type": "Organization",
+    "name": "CNBC",
+    "url": "https://www.cnbc.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://sc.cnbcfm.com/applications/cnbc.com/staticcontent/img/cnbc-hdr-logo2.png",
+      "width": 360,
+      "height": 60
+    },
+    "sameAs": [
+      "https://www.facebook.com/cnbc",
+      "https://www.instagram.com/cnbc",
+      "https://www.linkedin.com/company/cnbc",
+      "https://twitter.com/cnbc"
+    ]
+  },
+  "articleSection": "Investing",
+  "keywords": [
+    "cnbc",
+    "Articles",
+    "U.S. Economy",
+    "Retail industry",
+    "Life",
+    "Personal income",
+    "Entrepreneurship",
+    "Jobs",
+    "Investment strategy",
+    "Personal finance",
+    "Personal Finance",
+    "Investing",
+    "Make It - Entrepreneurs ",
+    "Make It - Side Hustles",
+    "Make It - The Hustle",
+    "Retail",
+    "US Economy",
+    "Best Jobs Ever",
+    "source:tagname:CNBC US Source"
+  ],
+  "image": {
+    "@type": "ImageObject",
+    "url": "https://image.cnbcfm.com/api/v1/image/105477347-1538147620753gettyimages-547016975.jpeg?v=1538147658",
+    "width": 5760,
+    "height": 3840
+  },
+  "thumbnailUrl": "https://image.cnbcfm.com/api/v1/image/105477347-1538147620753gettyimages-547016975.jpeg?v=1538147658&w=720&h=405",
+  "video": {
+    "@type": "VideoObject",
+    "contentUrl": "//cnbcmbr-vh.akamaihd.net/i/mp4/VCPS/Y2018/M05D01/7000016730/makeit_05012018_Fiverrsidehustle_MBR_,0240,0300,0500,0900,1300,1700,4500,.mp4.csmil/master.m3u8",
+    "description": "If you want a high-paying side hustle, consider offering up video services. ",
+    "duration": "PT1M",
+    "embedUrl": "https://www.cnbc.com/video/2018/05/01/the-highest-paying-side-hustles-on-fiverr.html",
+    "name": "The highest-paying side hustles on Fiverr",
+    "thumbnailUrl": "https://image.cnbcfm.com/api/v1/image/105174515-makeit_05012018_Fiverrsidehustles_mezz.jpg?v=1529478141",
+    "uploadDate": "2018-05-01T13:56:20+0000"
+  }
+}
