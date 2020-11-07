@@ -447,7 +447,7 @@ const extractor: Extractor = {
     return authorList;
   },
   calculateBestNode: (doc: cheerio.Root, lang: string): cheerio.Cheerio => {
-    let topNode: cheerio.Cheerio = doc('');
+    let topNode: cheerio.Cheerio | null = null;
     const nodesToCheck = doc('p, pre, td');
 
     const parentNodes: cheerio.Cheerio[] = [];
