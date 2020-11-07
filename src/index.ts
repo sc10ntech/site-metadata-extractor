@@ -170,13 +170,11 @@ export const lazy = (
       return global.lazyPageData.locale;
     },
     links() {
-      if (!global.lazyPageData.links) {
-        const doc = getParsedDoc.call(global, html);
-        const topNode = getTopNode.call(global, doc, this.lang());
-        global.lazyPageData.links = extractor.links(doc, topNode, this.lang());
-        return global.lazyPageData.links;
-      }
-      return [];
+      let doc = getParsedDoc.call(global, html);
+      const topNode = getTopNode.call(global, doc, this.lang());
+      doc = cleaner(doc);
+      global.lazyPageData.links = extractor.links(doc, topNode, this.lang());
+      return global.lazyPageData.links;
     },
     origin: () => {
       global.lazyPageData.origin = resourceUrlObj.origin;
@@ -203,13 +201,12 @@ export const lazy = (
       return global.lazyPageData.tags;
     },
     text() {
-      if (!global.lazyPageData.text) {
-        const doc = getParsedDoc.call(global, html);
-        const topNode = getTopNode.call(global, doc, this.lang());
-        global.lazyPageData.text = extractor.text(doc, topNode, this.lang());
-        return global.lazyPageData.text;
-      }
-      return '';
+      let doc = getParsedDoc.call(global, html);
+      doc = cleaner(doc);
+      const topNode = getTopNode.call(global, doc, this.lang());
+      const textData = extractor.text(doc, topNode, this.lang());
+      global.lazyPageData.text = textData;
+      return textData;
     },
     title: () => {
       const doc = getParsedDoc.call(global, html);
@@ -222,13 +219,11 @@ export const lazy = (
       return global.lazyPageData.type;
     },
     videos() {
-      if (!global.lazyPageData.videos) {
-        const doc = getParsedDoc.call(global, html);
-        const topNode = getTopNode.call(global, doc, this.lang());
-        global.lazyPageData.videos = extractor.videos(doc, topNode);
-        return global.lazyPageData.videos;
-      }
-      return [];
+      let doc = getParsedDoc.call(global, html);
+      doc = cleaner(doc);
+      const topNode = getTopNode.call(global, doc, this.lang());
+      global.lazyPageData.videos = extractor.videos(doc, topNode);
+      return global.lazyPageData.videos;
     }
   };
 };
@@ -246,5 +241,6 @@ function getParsedDoc(html: string): cheerio.Root {
 }
 
 function getTopNode(doc: cheerio.Root, lang: string): cheerio.Cheerio {
-  return (global.topNode = extractor.calculateBestNode(doc, lang));
+  global.topNode = extractor.calculateBestNode(doc, lang);
+  return global.topNode;
 }
