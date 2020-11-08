@@ -1,5 +1,5 @@
 {
-  "name": "extract-link-metadata",
+  "name": "extract-site-metadata",
   "version": "1.0.0",
   "description": "web resource metadata extractor",
   "main": "./dist/index.js",
@@ -9,6 +9,8 @@
   ],
   "scripts": {
     "build": "npm run prepare && tsc",
+    "collectCoverage": "jest --collectCoverage",
+    "format": "prettier --write \"src/*.{js,ts,json,md}\"",
     "prepare": "rimraf dist",
     "lint": "eslint 'src/**/*.{js,ts,tsx}' --quiet --fix",
     "test": "jest --silent"
@@ -42,6 +44,10 @@
   },
   "devDependencies": {
     "@babel/preset-typescript": "^7.12.1",
+    "@commitlint/cli": "^11.0.0",
+    "@commitlint/config-conventional": "^11.0.0",
+    "@semantic-release/changelog": "^5.0.1",
+    "@semantic-release/git": "^9.0.0",
     "@types/cheerio": "^0.22.14",
     "@types/dompurify": "2.0.4",
     "@types/jest": "^26.0.14",
@@ -66,6 +72,84 @@
     "presets": [
       "@babel/preset-typescript"
     ]
+  },
+  "commitlint": {
+    "parserPreset": "conventional-changelog-conventionalcommits",
+    "rules": {
+      "body-leading-blank": [
+        1,
+        "always"
+      ],
+      "body-max-line-length": [
+        2,
+        "always",
+        100
+      ],
+      "footer-leading-blank": [
+        1,
+        "always"
+      ],
+      "footer-max-line-length": [
+        2,
+        "always",
+        100
+      ],
+      "header-max-length": [
+        2,
+        "always",
+        100
+      ],
+      "scope-case": [
+        2,
+        "always",
+        "lower-case"
+      ],
+      "subject-case": [
+        2,
+        "never",
+        [
+          "sentence-case",
+          "start-case",
+          "pascal-case",
+          "upper-case"
+        ]
+      ],
+      "subject-empty": [
+        2,
+        "never"
+      ],
+      "subject-full-stop": [
+        2,
+        "never",
+        "."
+      ],
+      "type-case": [
+        2,
+        "always",
+        "lower-case"
+      ],
+      "type-empty": [
+        2,
+        "never"
+      ],
+      "type-enum": [
+        2,
+        "always",
+        [
+          "build",
+          "chore",
+          "ci",
+          "docs",
+          "feat",
+          "fix",
+          "perf",
+          "refactor",
+          "revert",
+          "style",
+          "test"
+        ]
+      ]
+    }
   },
   "eslintConfig": {
     "extends": [
@@ -92,7 +176,8 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "npm run lint"
+      "pre-commit": "npm run format && npm run lint",
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
     }
   },
   "jest": {
