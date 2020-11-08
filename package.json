@@ -35,7 +35,7 @@
   "homepage": "https://github.com/sc10ntech/extract-link-metadata#readme",
   "dependencies": {
     "cheerio": "^1.0.0-rc.3",
-    "dompurify": "^2.1.1",
+    "dompurify": "^2.2.2",
     "is-absolute-url": "^3.0.3",
     "lodash": "^4.17.20",
     "schema-dts": "^0.7.1",
