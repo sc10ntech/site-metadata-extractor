@@ -5,11 +5,7 @@
     "declarationDir": "./dist",
     "inlineSources": true,
     "inlineSourceMap": true,
-    "lib": [
-      "DOM",
-      "DOM.Iterable",
-      "ES2018"
-    ],
+    "lib": ["DOM", "DOM.Iterable", "ES2018"],
     "module": "commonjs",
     "moduleResolution": "node",
     "resolveJsonModule": true,

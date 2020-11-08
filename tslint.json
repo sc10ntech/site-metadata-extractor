@@ -1,18 +1,9 @@
 {
-  "extends": [
-    "tslint:latest",
-    "tslint-config-prettier"
-  ],
+  "extends": ["tslint:latest", "tslint-config-prettier"],
   "rules": {
-    "interface-name": [
-      true,
-      "never-prefix"
-    ],
+    "interface-name": [true, "never-prefix"],
     "no-console": false,
-    "no-namespace": [
-      true,
-      "allow-declarations"
-    ],
+    "no-namespace": [true, "allow-declarations"],
     "prettier": true,
     "variable-name": [
       true,
@@ -21,7 +12,5 @@
       "allow-leading-underscore"
     ]
   },
-  "rulesDirectory": [
-    "tslint-plugin-prettier"
-  ]
+  "rulesDirectory": ["tslint-plugin-prettier"]
 }
