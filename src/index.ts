@@ -55,7 +55,7 @@ export interface LazyExtractor {
   videos: () => VideoAttrs[];
 }
 
-const extractLinkMetadata = (
+const extractSiteMetadata = (
   markup: string,
   resourceUrl: string,
   lang = 'en'
@@ -99,7 +99,7 @@ const extractLinkMetadata = (
   return pageData;
 };
 
-export default extractLinkMetadata;
+export default extractSiteMetadata;
 
 // Allow access to document properties with lazy evaluation
 export const lazy = (

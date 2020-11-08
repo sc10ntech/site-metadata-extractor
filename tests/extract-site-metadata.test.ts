@@ -1,5 +1,5 @@
 import fs from 'fs';
-import extractLinkMetadata, { lazy } from '../src/index';
+import extractSiteMetadata, { lazy } from '../src/index';
 
 const allFields: string[] = [
   'author',
@@ -41,7 +41,7 @@ const checkFixture = (site: string, fields = allFields) => {
     fs.readFileSync(`tests/fixtures/test_${site}.json`).toString()
   );
 
-  const data = extractLinkMetadata(html, orig.url);
+  const data = extractSiteMetadata(html, orig.url);
   const dataLazy = lazy(html, orig.url);
 
   fields.forEach((field) => {
@@ -124,6 +124,10 @@ const checkFixture = (site: string, fields = allFields) => {
         expect(orig.expected.type).toEqual(data.type);
         expect(orig.expected.type).toEqual(dataLazy.type());
         break;
+      case 'publisher':
+        expect(orig.expected.publisher).toEqual(data.publisher);
+        expect(orig.expected.publisher).toEqual(dataLazy.publisher());
+        break;
       case 'links':
         const sortedLinks = data?.links?.sort();
         const sortedLazyLinks = dataLazy.links().sort();
@@ -139,6 +143,10 @@ const checkFixture = (site: string, fields = allFields) => {
         expect(orig.expected.links.sort()).toEqual(sortedLinks);
         expect(orig.expected.links.sort()).toEqual(sortedLazyLinks);
         break;
+      case 'siteName':
+        expect(orig.expected.origin).toEqual(data.origin);
+        expect(orig.expected.origin).toEqual(dataLazy.origin());
+        break;
       case 'videos':
         const sortedVideos = data?.videos?.sort();
         expect(orig.expected.movies.sort()).toEqual(sortedVideos);
@@ -152,7 +160,7 @@ const checkFixture = (site: string, fields = allFields) => {
 
 describe('Extract Link Metadata', () => {
   it('exists', () => {
-    expect(extractLinkMetadata).toBeDefined();
+    expect(extractSiteMetadata).toBeDefined();
   });
 
   it('lazy version exists', () => {
@@ -187,6 +195,29 @@ describe('Extract Link Metadata', () => {
     checkFixture('allnewlyrics1', ['link']);
   });
 
+  it('reads author', () => {
+    checkFixture('engadget2', ['author']);
+    checkFixture('cnbc2', ['author']);
+  });
+
+  it('reads copyright', () => {
+    checkFixture('engadget2', ['copyright']);
+    checkFixture('cnbc2', ['copyright']);
+  });
+
+  it('reads locale', () => {
+    checkFixture('engadget2', ['locale']);
+  });
+
+  it('reads type', () => {
+    checkFixture('cnbc2', ['type']);
+  });
+
+  it('reads publisher', () => {
+    checkFixture('engadget2', ['publisher']);
+    checkFixture('cnbc2', ['publisher']);
+  });
+
   it('reads tags', () => {
     checkFixture('tags_kexp', ['tags']);
     checkFixture('tags_deadline', ['tags']);
@@ -203,6 +234,14 @@ describe('Extract Link Metadata', () => {
 
   it('reads links', () => {
     checkFixture('polygon', ['links']);
+  });
+
+  it('reads origin', () => {
+    checkFixture('cnbc2', ['origin']);
+  });
+
+  it('reads site name', () => {
+    checkFixture('cnbc2', ['siteName']);
   });
 
   it('reads images', () => {
