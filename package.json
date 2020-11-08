@@ -1,16 +1,23 @@
 {
-  "name": "extract-link-metadata",
+  "name": "extract-site-metadata",
   "version": "1.0.0",
   "description": "web resource metadata extractor",
-  "main": "index.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "/dist"
+  ],
   "scripts": {
-    "compile": "tsc",
-    "lint": "tslint \"src/**/*.ts\"",
-    "test": "npm run test"
+    "build": "npm run prepare && tsc",
+    "collectCoverage": "jest --collectCoverage",
+    "format": "prettier --write \"src/*.{js,ts,json,md}\"",
+    "prepare": "rimraf dist",
+    "lint": "eslint 'src/**/*.{js,ts,tsx}' --quiet --fix",
+    "test": "jest --silent"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/collinwu/extract-link-metadata.git"
+    "url": "git+https://github.com/sc10ntech/extract-link-metadata.git"
   },
   "keywords": [
     "web",
@@ -20,44 +27,175 @@
     "schema.org",
     "structured-data"
   ],
-  "author": "collinwu@gmail.com",
-  "license": "UNLICENSED",
+  "author": "collin@sc10n.com",
+  "license": "MIT",
   "bugs": {
-    "url": "https://github.com/collinwu/extract-link-metadata/issues"
+    "url": "https://github.com/sc10ntech/extract-link-metadata/issues"
   },
-  "homepage": "https://github.com/collinwu/extract-link-metadata#readme",
+  "homepage": "https://github.com/sc10ntech/extract-link-metadata#readme",
   "dependencies": {
     "cheerio": "^1.0.0-rc.3",
-    "dompurify": "^2.0.7",
+    "dompurify": "^2.1.1",
     "is-absolute-url": "^3.0.3",
-    "lodash": "^4.17.15",
-    "validator": "^11.1.0",
-    "xregexp": "^4.2.4"
+    "lodash": "^4.17.20",
+    "schema-dts": "^0.7.1",
+    "validator": "^13.1.17",
+    "xregexp": "^4.3.0"
   },
   "devDependencies": {
+    "@babel/preset-typescript": "^7.12.1",
+    "@commitlint/cli": "^11.0.0",
+    "@commitlint/config-conventional": "^11.0.0",
+    "@semantic-release/changelog": "^5.0.1",
+    "@semantic-release/git": "^9.0.0",
     "@types/cheerio": "^0.22.14",
-    "@types/dompurify": "0.0.33",
-    "@types/jest": "^24.0.23",
+    "@types/dompurify": "2.0.4",
+    "@types/jest": "^26.0.14",
     "@types/lodash": "^4.14.149",
-    "@types/node": "^12.12.14",
-    "@types/validator": "^10.11.3",
-    "@types/xregexp": "^3.0.30",
-    "husky": "^3.1.0",
-    "jest": "^24.9.0",
-    "prettier": "^1.19.1",
-    "ts-jest": "^24.2.0",
-    "tslint": "^5.20.1",
-    "tslint-config-prettier": "^1.18.0",
-    "tslint-plugin-prettier": "^2.0.1",
-    "typescript": "^3.7.2"
+    "@types/node": "^14.11.10",
+    "@types/validator": "^13.1.0",
+    "@types/xregexp": "^4.3.0",
+    "@typescript-eslint/eslint-plugin": "^4.5.0",
+    "@typescript-eslint/parser": "^4.5.0",
+    "eslint": "^7.11.0",
+    "eslint-config-prettier": "^6.13.0",
+    "eslint-plugin-prettier": "^3.1.4",
+    "esm": "^3.2.25",
+    "husky": "^4.3.0",
+    "jest": "^26.6.0",
+    "prettier": "^2.1.2",
+    "ts-jest": "^26.4.1",
+    "typedoc": "^0.19.2",
+    "typescript": "^4.0.3"
+  },
+  "babel": {
+    "presets": [
+      "@babel/preset-typescript"
+    ]
+  },
+  "commitlint": {
+    "parserPreset": "conventional-changelog-conventionalcommits",
+    "rules": {
+      "body-leading-blank": [
+        1,
+        "always"
+      ],
+      "body-max-line-length": [
+        2,
+        "always",
+        100
+      ],
+      "footer-leading-blank": [
+        1,
+        "always"
+      ],
+      "footer-max-line-length": [
+        2,
+        "always",
+        100
+      ],
+      "header-max-length": [
+        2,
+        "always",
+        100
+      ],
+      "scope-case": [
+        2,
+        "always",
+        "lower-case"
+      ],
+      "subject-case": [
+        2,
+        "never",
+        [
+          "sentence-case",
+          "start-case",
+          "pascal-case",
+          "upper-case"
+        ]
+      ],
+      "subject-empty": [
+        2,
+        "never"
+      ],
+      "subject-full-stop": [
+        2,
+        "never",
+        "."
+      ],
+      "type-case": [
+        2,
+        "always",
+        "lower-case"
+      ],
+      "type-empty": [
+        2,
+        "never"
+      ],
+      "type-enum": [
+        2,
+        "always",
+        [
+          "build",
+          "chore",
+          "ci",
+          "docs",
+          "feat",
+          "fix",
+          "perf",
+          "refactor",
+          "revert",
+          "style",
+          "test"
+        ]
+      ]
+    }
+  },
+  "eslintConfig": {
+    "extends": [
+      "plugin:@typescript-eslint/recommended",
+      "prettier/@typescript-eslint",
+      "plugin:prettier/recommended"
+    ],
+    "env": {
+      "browser": true,
+      "node": true
+    },
+    "parser": "@typescript-eslint/parser",
+    "plugins": [
+      "@typescript-eslint",
+      "prettier"
+    ],
+    "rules": {
+      "array-bracket-spacing": "error",
+      "new-cap": "off",
+      "prettier/prettier": "error",
+      "sort-keys": "off",
+      "space-infix-ops": "error"
+    }
   },
   "husky": {
     "hooks": {
-      "pre-commit": "npm run lint"
+      "pre-commit": "npm run format && npm run lint",
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
     }
+  },
+  "jest": {
+    "globals": {
+      "pageData": true
+    },
+    "testMatch": [
+      "**/__tests__/**/*.+(ts)",
+      "**/?(*.)+(spec|test).+(ts)"
+    ],
+    "transform": {
+      "^.+\\.(ts)$": "ts-jest"
+    },
+    "verbose": true
   },
   "prettier": {
     "singleQuote": true,
-    "tabWidth": 2
+    "tabWidth": 2,
+    "trailingComma": "none"
   }
 }

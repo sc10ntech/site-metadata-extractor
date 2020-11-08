@@ -1,48 +1,45 @@
 import fs from 'fs';
 import path from 'path';
 
-const cache: any = {};
+interface StopWords {
+  stopWordCount: number;
+  stopWords: string[];
+  wordCount: number;
+}
 
-const candiateWords = (strippedInput: string) => {
+const cache: { [key: string]: string[] } = {};
+
+const candiateWords = (strippedInput: string): string[] => {
   return strippedInput.split(' ');
 };
 
 const getFilePath = (lang: string) => {
-  return path.resolve(
-    __dirname,
-    '..',
-    'data',
-    'stopwords',
-    `stopwords-${lang}.txt`
-  );
+  return path.resolve(`./data/stopwords/stopwords-${lang}.txt`);
 };
 
 const removePunctuation = (content: string) => {
-  return content.replace(
-    /[\|\@\<\>\[\]\"\'\.,-\/#\?!$%\^&\*\+;:{}=\-_`~()]/g,
-    ''
-  );
+  return content.replace(/[|@<>[\]"'.,-/#?!$%^&*+;:{}=\-_`~()]/g, '');
 };
 
-const stopwords = (content: any, lang: any = 'en') => {
+const stopwords = (content: string, lang = 'en'): StopWords => {
   let filePath = getFilePath(lang);
-  let stopWords: any;
+  let stopWords: string[];
 
   if (!fs.existsSync(filePath)) {
-    console.error(
+    console.warn(
       `WARNING: No stopwords file found for '${lang}' - defaulting to English!`
     );
     filePath = getFilePath('en');
   }
 
-  if (cache.hasOwnProperty(lang)) {
+  if (Object.prototype.hasOwnProperty.call(cache, lang)) {
     stopWords = cache[lang];
   } else {
     stopWords = fs
       .readFileSync(filePath)
       .toString()
       .split('\n')
-      .filter(str => {
+      .filter((str) => {
         return str.length > 0;
       });
     cache[lang] = stopWords;
@@ -53,7 +50,7 @@ const stopwords = (content: any, lang: any = 'en') => {
   const overlappingStopwords: string[] = [];
   let count = 0;
 
-  words.forEach(word => {
+  words.forEach((word) => {
     count++;
     if (stopWords.indexOf(word.toLowerCase()) > -1) {
       overlappingStopwords.push(word.toLowerCase());

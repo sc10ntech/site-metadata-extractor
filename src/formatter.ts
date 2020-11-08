@@ -1,10 +1,14 @@
+import cheerio from 'cheerio';
 import xregexp from 'xregexp';
 import stopwords from './stopwords';
 
-export const addNewlineToBr = (doc: any, topNode: any) => {
+export const addNewlineToBr = (
+  doc: cheerio.Root,
+  topNode: cheerio.Cheerio
+): cheerio.Root => {
   const brs = topNode.find('br');
 
-  brs.each((_index: number, element: any) => {
+  brs.each((_index: number, element: cheerio.Element) => {
     const br = doc(element);
     br.replaceWith('\n\n');
   });
@@ -12,19 +16,22 @@ export const addNewlineToBr = (doc: any, topNode: any) => {
   return doc;
 };
 
-export const cleanParagraphText = (rawText: string) => {
+export const cleanParagraphText = (rawText: string): string => {
   const text = rawText.trim();
   text.replace(/[\s\t]+/g, ' ');
   return text;
 };
 
-export const convertToText = (doc: any, topNode: any) => {
+export const convertToText = (
+  doc: cheerio.Root,
+  topNode: cheerio.Cheerio
+): string => {
   let texts: string[] = [];
   const nodes = topNode.contents();
 
   let hangingText = '';
 
-  nodes.each((_index: number, element: any) => {
+  nodes.each((_index: number, element: cheerio.Element) => {
     const node = doc(element);
     const nodeType = node[0] ? node[0].type : null;
     const nodeName = node[0] ? node[0].name : null;
@@ -53,34 +60,40 @@ export const convertToText = (doc: any, topNode: any) => {
     texts = texts = texts.concat(text.split(/\r?\n/));
   }
 
-  texts = texts.map(txt => {
+  texts = texts.map((txt) => {
     return txt.trim();
   });
 
   const regex = xregexp('[\\p{Number}\\p{Letter}]');
-  texts = texts.filter(txt => {
+  texts = texts.filter((txt) => {
     return regex.test(txt);
   });
 
   return texts.join('\n\n');
 };
 
-export const linksToText = (doc: any, topNode: any) => {
+export const linksToText = (
+  doc: cheerio.Root,
+  topNode: cheerio.Cheerio
+): cheerio.Root => {
   const nodes = topNode.find('a');
-  nodes.each((_index: number, element: any) => {
-    doc(element).replaceWith(doc(element).html());
+  nodes.each((_index: number, element: cheerio.Element) => {
+    const htmlEl = doc(element).html();
+    if (htmlEl) {
+      doc(element).replaceWith(htmlEl);
+    }
   });
   return doc;
 };
 
 export const removeFewWordsParagraphs = (
-  doc: any,
-  topNode: any,
-  lang: string | undefined | null
-) => {
+  doc: cheerio.Root,
+  topNode: cheerio.Cheerio,
+  lang: string
+): cheerio.Root => {
   const allNodes = topNode.find('*');
 
-  allNodes.each((_index: number, element: any) => {
+  allNodes.each((_index: number, element: cheerio.Element) => {
     const el = doc(element);
     const tag = el[0].name;
     const text = el.text();
@@ -104,12 +117,19 @@ export const removeFewWordsParagraphs = (
   return doc;
 };
 
-export const removeNegativescoresNodes = (doc: any, topNode: any) => {
+export const removeNegativescoresNodes = (
+  doc: cheerio.Root,
+  topNode: cheerio.Cheerio
+): cheerio.Root => {
   const gravityItems = topNode.find('*[gravityScore]');
 
-  gravityItems.each((_index: number, element: any) => {
+  gravityItems.each((_index: number, element: cheerio.Element) => {
+    let score = 0;
     const item = doc(element);
-    const score = parseInt(item.attr('gravityScore'), 10) || 0;
+    const gravityScore = item.attr('gravityScore');
+    if (gravityScore) {
+      score = parseInt(gravityScore, 10) || 0;
+    }
 
     if (score < 1) {
       doc(item).remove();
@@ -123,10 +143,10 @@ export const replaceCharacters = (
   text: string,
   html: boolean,
   chars: boolean
-) => {
+): string => {
   let processedText = text;
   // if element does not match any in map and starts with & and ends with ;, replace with empty string
-  const htmlEntities: any = {
+  const htmlEntities: Record<string, string> = {
     '&amp;': '&',
     '&apos;': "'",
     '&cent;': '¢',
@@ -141,7 +161,7 @@ export const replaceCharacters = (
     '&yen;': '¥'
   };
 
-  const escapeChars: any = {
+  const escapeChars: Record<string, string> = {
     '"': '"',
     "'": "'",
     // tslint:disable-next-line: object-literal-sort-keys
@@ -166,26 +186,33 @@ export const replaceCharacters = (
   return processedText;
 };
 
-export const replaceWithText = (doc: any, topNode: any) => {
+export const replaceWithText = (
+  doc: cheerio.Root,
+  topNode: cheerio.Cheerio
+): cheerio.Root => {
   const nodes = topNode.find('b, strong, i, br, sup');
-  nodes.each((_index: number, element: any) => {
+  nodes.each((_index: number, element: cheerio.Element) => {
     doc(element).replaceWith(doc(element).text());
   });
   return doc;
 };
 
-export const ulToText = (doc: any, node: any) => {
+export const ulToText = (doc: cheerio.Root, node: cheerio.Cheerio): string => {
   const nodes = node.find('li');
   let text = '';
 
-  nodes.each((_index: number, element: any) => {
+  nodes.each((_index: number, element: cheerio.Element) => {
     text = `${text}\n * ${doc(element).text()}`;
   });
   text = `${text}\n`;
   return text;
 };
 
-const formatter = (doc: any, topNode: any, lang: string | undefined | null) => {
+const formatter = (
+  doc: cheerio.Root,
+  topNode: cheerio.Cheerio,
+  lang: string
+): string => {
   removeNegativescoresNodes(doc, topNode);
   linksToText(doc, topNode);
   addNewlineToBr(doc, topNode);
