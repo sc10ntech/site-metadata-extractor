@@ -38,7 +38,7 @@
     "dompurify": "^2.1.1",
     "is-absolute-url": "^3.0.3",
     "lodash": "^4.17.20",
-    "schema-dts": "^0.7.1",
+    "schema-dts": "^0.9.0",
     "validator": "^13.1.17",
     "xregexp": "^4.3.0"
   },
