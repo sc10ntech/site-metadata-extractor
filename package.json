@@ -39,7 +39,7 @@
     "is-absolute-url": "^3.0.3",
     "lodash": "^4.17.20",
     "schema-dts": "^0.7.1",
-    "validator": "^13.1.17",
+    "validator": "^13.7.0",
     "xregexp": "^4.3.0"
   },
   "devDependencies": {
