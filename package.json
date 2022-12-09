@@ -37,7 +37,7 @@
     "cheerio": "^1.0.0-rc.3",
     "dompurify": "^2.1.1",
     "is-absolute-url": "^3.0.3",
-    "lodash": "^4.17.20",
+    "lodash": "^4.17.21",
     "schema-dts": "^0.7.1",
     "validator": "^13.1.17",
     "xregexp": "^4.3.0"
