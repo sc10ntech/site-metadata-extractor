@@ -33,7 +33,6 @@ export const convertToText = (
 
   nodes.each((_index: number, element: cheerio.Element) => {
     const node = doc(element);
-    console.error(node, "this is node in convertToText");
     const nodeType = node.get(0) ? node.get(0).type : null;
     const nodeName = node.get(0) ? node.get(0).tagName : null;
 
