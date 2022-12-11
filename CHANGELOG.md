@@ -1,3 +1,11 @@
+## [1.0.2](https://github.com/sc10ntech/site-metadata-extractor/compare/v1.0.1...v1.0.2) (2022-12-11)
+
+
+### Bug Fixes
+
+* **ci:** fix release ci workflow missing build step ([d0d9d6a](https://github.com/sc10ntech/site-metadata-extractor/commit/d0d9d6a979b1cd719a03427393e1eac6862e49bd))
+* **formatter:** remove false error log ([5e17887](https://github.com/sc10ntech/site-metadata-extractor/commit/5e17887e56767253eb5ee7c20ec17416413d7362))
+
 ## [1.0.1](https://github.com/sc10ntech/site-metadata-extractor/compare/v1.0.0...v1.0.1) (2022-12-11)
 
 
