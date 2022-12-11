@@ -1,6 +1,6 @@
 {
   "name": "site-metadata-extractor",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "web(site) resource metadata extractor",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -12,7 +12,6 @@
     "clean": "rimraf dist",
     "collectCoverage": "jest --collectCoverage",
     "format": "prettier --write \"src/*.{js,ts,json,md}\"",
-    "prepare": "husky install",
     "lint": "eslint 'src/**/*.{js,ts,tsx}' --quiet --fix",
     "test": "jest --silent",
     "test:watch": "jest --silent --watch",
