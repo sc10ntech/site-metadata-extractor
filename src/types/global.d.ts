@@ -1,9 +1,10 @@
+/* eslint-disable no-var */
 import cheerio from "cheerio";
 import { PageData } from "../index";
 
 declare global {
-  const cleanedDoc: cheerio.Root;
-  const doc: cheerio.Root;
-  const lazyPageData: PageData;
-  const topNode: cheerio.Cheerio;
+  var cleanedDoc: cheerio.Root;
+  var doc: cheerio.Root;
+  var lazyPageData: PageData;
+  var topNode: cheerio.Cheerio;
 }
