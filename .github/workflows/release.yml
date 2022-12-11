@@ -23,7 +23,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Run tests
-        run: npm run test
+        run: npm run test && npm run collectCoverage
+      - name: Run build
+        run: npm run build
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
