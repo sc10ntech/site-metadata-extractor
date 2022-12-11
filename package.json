@@ -46,7 +46,6 @@
     "xregexp": "^5.1.1"
   },
   "devDependencies": {
-    "@babel/preset-typescript": "^7.12.1",
     "@commitlint/cli": "^17.3.0",
     "@commitlint/config-conventional": "^17.3.0",
     "@semantic-release/changelog": "^6.0.2",
@@ -70,89 +69,6 @@
     "ts-jest": "^29.0.3",
     "typedoc": "^0.23.21",
     "typescript": "^4.9.4"
-  },
-  "babel": {
-    "presets": [
-      "@babel/preset-typescript"
-    ]
-  },
-  "commitlint": {
-    "parserPreset": "conventional-changelog-conventionalcommits",
-    "rules": {
-      "body-leading-blank": [
-        1,
-        "always"
-      ],
-      "body-max-line-length": [
-        2,
-        "always",
-        100
-      ],
-      "footer-leading-blank": [
-        1,
-        "always"
-      ],
-      "footer-max-line-length": [
-        2,
-        "always",
-        100
-      ],
-      "header-max-length": [
-        2,
-        "always",
-        100
-      ],
-      "scope-case": [
-        2,
-        "always",
-        "lower-case"
-      ],
-      "subject-case": [
-        2,
-        "never",
-        [
-          "sentence-case",
-          "start-case",
-          "pascal-case",
-          "upper-case"
-        ]
-      ],
-      "subject-empty": [
-        2,
-        "never"
-      ],
-      "subject-full-stop": [
-        2,
-        "never",
-        "."
-      ],
-      "type-case": [
-        2,
-        "always",
-        "lower-case"
-      ],
-      "type-empty": [
-        2,
-        "never"
-      ],
-      "type-enum": [
-        2,
-        "always",
-        [
-          "build",
-          "chore",
-          "ci",
-          "docs",
-          "feat",
-          "fix",
-          "perf",
-          "refactor",
-          "revert",
-          "style",
-          "test"
-        ]
-      ]
-    }
   },
   "release": {
     "branches": [
