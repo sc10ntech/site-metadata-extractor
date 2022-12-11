@@ -1,5 +1,5 @@
-import fs from 'fs';
-import path from 'path';
+import fs from "fs";
+import path from "path";
 
 interface StopWords {
   stopWordCount: number;
@@ -10,7 +10,7 @@ interface StopWords {
 const cache: { [key: string]: string[] } = {};
 
 const candiateWords = (strippedInput: string): string[] => {
-  return strippedInput.split(' ');
+  return strippedInput.split(" ");
 };
 
 const getFilePath = (lang: string) => {
@@ -18,10 +18,10 @@ const getFilePath = (lang: string) => {
 };
 
 const removePunctuation = (content: string) => {
-  return content.replace(/[|@<>[\]"'.,-/#?!$%^&*+;:{}=\-_`~()]/g, '');
+  return content.replace(/[|@<>[\]"'.,-/#?!$%^&*+;:{}=\-_`~()]/g, "");
 };
 
-const stopwords = (content: string, lang = 'en'): StopWords => {
+const stopwords = (content: string, lang = "en"): StopWords => {
   let filePath = getFilePath(lang);
   let stopWords: string[];
 
@@ -29,7 +29,7 @@ const stopwords = (content: string, lang = 'en'): StopWords => {
     console.warn(
       `WARNING: No stopwords file found for '${lang}' - defaulting to English!`
     );
-    filePath = getFilePath('en');
+    filePath = getFilePath("en");
   }
 
   if (Object.prototype.hasOwnProperty.call(cache, lang)) {
@@ -38,7 +38,7 @@ const stopwords = (content: string, lang = 'en'): StopWords => {
     stopWords = fs
       .readFileSync(filePath)
       .toString()
-      .split('\n')
+      .split("\n")
       .filter((str) => {
         return str.length > 0;
       });
@@ -60,7 +60,7 @@ const stopwords = (content: string, lang = 'en'): StopWords => {
   return {
     stopWordCount: overlappingStopwords.length,
     stopWords: overlappingStopwords,
-    wordCount: count
+    wordCount: count,
   };
 };
 

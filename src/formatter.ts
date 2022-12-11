@@ -1,16 +1,16 @@
-import cheerio from 'cheerio';
-import xregexp from 'xregexp';
-import stopwords from './stopwords';
+import cheerio from "cheerio";
+import xregexp from "xregexp";
+import stopwords from "./stopwords";
 
 export const addNewlineToBr = (
   doc: cheerio.Root,
   topNode: cheerio.Cheerio
 ): cheerio.Root => {
-  const brs = topNode.find('br');
+  const brs = topNode.find("br");
 
   brs.each((_index: number, element: cheerio.Element) => {
     const br = doc(element);
-    br.replaceWith('\n\n');
+    br.replaceWith("\n\n");
   });
 
   return doc;
@@ -18,7 +18,7 @@ export const addNewlineToBr = (
 
 export const cleanParagraphText = (rawText: string): string => {
   const text = rawText.trim();
-  text.replace(/[\s\t]+/g, ' ');
+  text.replace(/[\s\t]+/g, " ");
   return text;
 };
 
@@ -29,17 +29,18 @@ export const convertToText = (
   let texts: string[] = [];
   const nodes = topNode.contents();
 
-  let hangingText = '';
+  let hangingText = "";
 
   nodes.each((_index: number, element: cheerio.Element) => {
     const node = doc(element);
-    const nodeType = node[0] ? node[0].type : null;
-    const nodeName = node[0] ? node[0].name : null;
+    console.error(node, "this is node in convertToText");
+    const nodeType = node.get(0) ? node.get(0).type : null;
+    const nodeName = node.get(0) ? node.get(0).tagName : null;
 
-    if (nodeType === 'text') {
+    if (nodeType === "text") {
       hangingText += node.text();
       return true;
-    } else if (nodeName === 'ul') {
+    } else if (nodeName === "ul") {
       hangingText += ulToText(doc, node);
       return true;
     }
@@ -47,11 +48,11 @@ export const convertToText = (
     if (hangingText.length > 0) {
       const txt = cleanParagraphText(hangingText);
       texts = texts.concat(txt.split(/\r?\n/));
-      hangingText = '';
+      hangingText = "";
     }
 
     let text = cleanParagraphText(node.text());
-    text = text.replace(/(\w+\.)([A-Z]+)/, '$1 $2');
+    text = text.replace(/(\w+\.)([A-Z]+)/, "$1 $2");
     texts = texts.concat(text.split(/\r?\n/));
   });
 
@@ -64,19 +65,19 @@ export const convertToText = (
     return txt.trim();
   });
 
-  const regex = xregexp('[\\p{Number}\\p{Letter}]');
+  const regex = xregexp("[\\p{Number}\\p{Letter}]");
   texts = texts.filter((txt) => {
     return regex.test(txt);
   });
 
-  return texts.join('\n\n');
+  return texts.join("\n\n");
 };
 
 export const linksToText = (
   doc: cheerio.Root,
   topNode: cheerio.Cheerio
 ): cheerio.Root => {
-  const nodes = topNode.find('a');
+  const nodes = topNode.find("a");
   nodes.each((_index: number, element: cheerio.Element) => {
     const htmlEl = doc(element).html();
     if (htmlEl) {
@@ -91,24 +92,24 @@ export const removeFewWordsParagraphs = (
   topNode: cheerio.Cheerio,
   lang: string
 ): cheerio.Root => {
-  const allNodes = topNode.find('*');
+  const allNodes = topNode.find("*");
 
   allNodes.each((_index: number, element: cheerio.Element) => {
     const el = doc(element);
-    const tag = el[0].name;
+    const tag = el.get(0).tagName;
     const text = el.text();
 
     const stopWords = stopwords(text, lang);
     if (
-      (tag !== 'br' || text !== '\\r') &&
+      (tag !== "br" || text !== "\\r") &&
       stopWords.stopWordCount < 3 &&
-      el.find('object').length === 0 &&
-      el.find('embed').length === 0
+      el.find("object").length === 0 &&
+      el.find("embed").length === 0
     ) {
       doc(el).remove();
     } else {
       const trimmed = text.trim();
-      if (trimmed[0] === '(' && trimmed[trimmed.length - 1] === ')') {
+      if (trimmed[0] === "(" && trimmed[trimmed.length - 1] === ")") {
         doc(el).remove();
       }
     }
@@ -121,12 +122,12 @@ export const removeNegativescoresNodes = (
   doc: cheerio.Root,
   topNode: cheerio.Cheerio
 ): cheerio.Root => {
-  const gravityItems = topNode.find('*[gravityScore]');
+  const gravityItems = topNode.find("*[gravityScore]");
 
   gravityItems.each((_index: number, element: cheerio.Element) => {
     let score = 0;
     const item = doc(element);
-    const gravityScore = item.attr('gravityScore');
+    const gravityScore = item.attr("gravityScore");
     if (gravityScore) {
       score = parseInt(gravityScore, 10) || 0;
     }
@@ -147,38 +148,38 @@ export const replaceCharacters = (
   let processedText = text;
   // if element does not match any in map and starts with & and ends with ;, replace with empty string
   const htmlEntities: Record<string, string> = {
-    '&amp;': '&',
-    '&apos;': "'",
-    '&cent;': '¢',
-    '&copy;': '©',
-    '&euro;': '€',
-    '&gt;': '>',
-    '&lt;': '<',
-    '&nbsp;': ' ',
-    '&pound;': '£',
-    '&quot;': '"',
-    '&reg;': '®',
-    '&yen;': '¥'
+    "&amp;": "&",
+    "&apos;": "'",
+    "&cent;": "¢",
+    "&copy;": "©",
+    "&euro;": "€",
+    "&gt;": ">",
+    "&lt;": "<",
+    "&nbsp;": " ",
+    "&pound;": "£",
+    "&quot;": '"',
+    "&reg;": "®",
+    "&yen;": "¥",
   };
 
   const escapeChars: Record<string, string> = {
     '"': '"',
     "'": "'",
     // tslint:disable-next-line: object-literal-sort-keys
-    '\n': ' ',
-    '\r': ' '
+    "\n": " ",
+    "\r": " ",
   };
 
   if (html) {
     for (const key of Object.keys(htmlEntities)) {
-      const htmlregex = new RegExp(key, 'g');
+      const htmlregex = new RegExp(key, "g");
       processedText = processedText.replace(htmlregex, htmlEntities[key]);
     }
   }
 
   if (chars) {
     for (const key of Object.keys(escapeChars)) {
-      const escapeCharsRegex = new RegExp(key, 'g');
+      const escapeCharsRegex = new RegExp(key, "g");
       processedText = processedText.replace(escapeCharsRegex, escapeChars[key]);
     }
   }
@@ -190,7 +191,7 @@ export const replaceWithText = (
   doc: cheerio.Root,
   topNode: cheerio.Cheerio
 ): cheerio.Root => {
-  const nodes = topNode.find('b, strong, i, br, sup');
+  const nodes = topNode.find("b, strong, i, br, sup");
   nodes.each((_index: number, element: cheerio.Element) => {
     doc(element).replaceWith(doc(element).text());
   });
@@ -198,8 +199,8 @@ export const replaceWithText = (
 };
 
 export const ulToText = (doc: cheerio.Root, node: cheerio.Cheerio): string => {
-  const nodes = node.find('li');
-  let text = '';
+  const nodes = node.find("li");
+  let text = "";
 
   nodes.each((_index: number, element: cheerio.Element) => {
     text = `${text}\n * ${doc(element).text()}`;
@@ -218,7 +219,7 @@ const formatter = (
   addNewlineToBr(doc, topNode);
   replaceWithText(doc, topNode);
   removeFewWordsParagraphs(doc, topNode, lang);
-  const convertedText = convertToText(doc, topNode).replace(/\n/g, ' ');
+  const convertedText = convertToText(doc, topNode).replace(/\n/g, " ");
   return replaceCharacters(convertedText, false, true);
 };
 
