@@ -1,24 +1,24 @@
-import cheerio from 'cheerio';
+import cheerio from "cheerio";
 
 function cleanArticleTags(doc: cheerio.Root) {
-  const articles = doc('article');
+  const articles = doc("article");
   articles.each((_index: number, element: cheerio.Element) => {
-    doc(element).removeAttr('id');
-    doc(element).removeAttr('name');
-    doc(element).removeAttr('class');
+    doc(element).removeAttr("id");
+    doc(element).removeAttr("name");
+    doc(element).removeAttr("class");
   });
   return doc;
 }
 
 function cleanBadTags(doc: cheerio.Root) {
   const removeNodesRe =
-    '^side$|combx|retweet|mediaarticlerelated|menucontainer|navbar|partner-gravity-ad|video-full-transcript|storytopbar-bucket|utility-bar|inline-share-tools|comment|PopularQuestions|contact|foot|footer|Footer|footnote|cnn_strycaptiontxt|cnn_html_slideshow|cnn_strylftcntnt|links|meta$|shoutbox|sponsor|tags|socialnetworking|socialNetworking|cnnStryHghLght|cnn_stryspcvbx|^inset$|pagetools|post-attributes|welcome_form|contentTools2|the_answers|communitypromo|runaroundLeft|subscribe|vcard|articleheadings|date|^print$|popup|author-dropdown|tools|socialtools|byline|konafilter|KonaFilter|breadcrumbs|^fn$|wp-caption-text|legende|ajoutVideo|timestamp|js_replies';
-  const regex = new RegExp(removeNodesRe, 'i');
+    "^side$|combx|retweet|mediaarticlerelated|menucontainer|navbar|partner-gravity-ad|video-full-transcript|storytopbar-bucket|utility-bar|inline-share-tools|comment|PopularQuestions|contact|foot|footer|Footer|footnote|cnn_strycaptiontxt|cnn_html_slideshow|cnn_strylftcntnt|links|meta$|shoutbox|sponsor|tags|socialnetworking|socialNetworking|cnnStryHghLght|cnn_stryspcvbx|^inset$|pagetools|post-attributes|welcome_form|contentTools2|the_answers|communitypromo|runaroundLeft|subscribe|vcard|articleheadings|date|^print$|popup|author-dropdown|tools|socialtools|byline|konafilter|KonaFilter|breadcrumbs|^fn$|wp-caption-text|legende|ajoutVideo|timestamp|js_replies";
+  const regex = new RegExp(removeNodesRe, "i");
 
-  const toRemove = doc('*').filter((_index, el) => {
-    const idEl = doc(el).attr('id');
-    const classEl = doc(el).attr('class');
-    const nameEl = doc(el).attr('name');
+  const toRemove = doc("*").filter((_index, el) => {
+    const idEl = doc(el).attr("id");
+    const classEl = doc(el).attr("class");
+    const nameEl = doc(el).attr("name");
     if (idEl) {
       return idEl.match(regex) !== null;
     } else if (classEl) {
@@ -42,9 +42,9 @@ function cleanCodeBlocks(doc: cheerio.Root) {
 }
 
 function cleanEmTags(doc: cheerio.Root) {
-  const ems = doc('em');
+  const ems = doc("em");
   ems.each((_index: number, element: cheerio.Element) => {
-    const images = ems.find('img');
+    const images = ems.find("img");
     if (images.length === 0) {
       const htmlEl = doc(element).html();
       if (htmlEl) {
@@ -56,15 +56,15 @@ function cleanEmTags(doc: cheerio.Root) {
 }
 
 function cleanErrantLineBreaks(doc: cheerio.Root) {
-  doc('p').each((_index: number, element: cheerio.Element) => {
+  doc("p").each((_index: number, element: cheerio.Element) => {
     const node = doc(element);
     const contents = node.contents();
 
     doc(contents).each((_cindex: number, cElement: cheerio.Element) => {
       const contentsNode = doc(cElement);
-      if (contentsNode && contentsNode[0] && contentsNode[0].type === 'text') {
+      if (contentsNode && contentsNode[0] && contentsNode[0].type === "text") {
         contentsNode.replaceWith(
-          contentsNode.text().replace(/([^\n])\n([^\n])/g, '$1 $2')
+          contentsNode.text().replace(/([^\n])\n([^\n])/g, "$1 $2")
         );
       }
     });
@@ -73,7 +73,7 @@ function cleanErrantLineBreaks(doc: cheerio.Root) {
 }
 
 function cleanParaSpans(doc: cheerio.Root) {
-  const nodes = doc('p span');
+  const nodes = doc("p span");
   nodes.each((_index: number, element: cheerio.Element) => {
     const htmlEl = doc(element).html();
     if (htmlEl) {
@@ -84,7 +84,7 @@ function cleanParaSpans(doc: cheerio.Root) {
 }
 
 function cleanUnderlines(doc: cheerio.Root) {
-  const nodes = doc('u');
+  const nodes = doc("u");
   nodes.each((_index: number, element: cheerio.Element) => {
     const htmlEl = doc(element).html();
     if (htmlEl) {
@@ -98,30 +98,30 @@ function divToPara(doc: cheerio.Root, domType: string) {
   const divs = doc(domType);
 
   const tags = [
-    'a',
-    'blockquote',
-    'dl',
-    'div',
-    'img',
-    'ol',
-    'p',
-    'pre',
-    'table',
-    'ul'
+    "a",
+    "blockquote",
+    "dl",
+    "div",
+    "img",
+    "ol",
+    "p",
+    "pre",
+    "table",
+    "ul",
   ];
 
   divs.each((_index: number, element: cheerio.Element) => {
     const div = doc(element);
-    const items = div.find(tags.join(', '));
+    const items = div.find(tags.join(", "));
 
     if (items.length === 0) {
       replaceWithPara(doc, element);
     } else {
       const replaceNodes = getReplacementNodes(doc, div);
 
-      let html = '';
+      let html = "";
       replaceNodes.forEach((node) => {
-        if (node.text() !== '') {
+        if (node.text() !== "") {
           html += `<p>${node}</p>`;
         }
       });
@@ -142,11 +142,15 @@ function getReplacementNodes(
   const nodesToRemove: cheerio.Cheerio[] = [];
   const children = div.contents();
 
-  children.each((_index: number, element: cheerio.Element) => {
+  children.each((_index: number, element) => {
     const child = doc(element);
 
-    if (child[0] && child[0].name === 'p' && replacementText.length > 0) {
-      const text = replacementText.join('');
+    if (
+      child.get(0) &&
+      child.get(0).tagName === "p" &&
+      replacementText.length > 0
+    ) {
+      const text = replacementText.join("");
       const textNodeLoad = cheerio.load(`<p>${text}</p>`);
       const textNode = doc(textNodeLoad);
       // create a node out of text and push
@@ -156,26 +160,26 @@ function getReplacementNodes(
       if (childEl) {
         nodesToReturn.push(childEl);
       }
-    } else if (child[0] && child[0].type === 'text') {
+    } else if (child.get(0) && child.get(0).type === "text") {
       const childTextNode = child;
       const childText = child.text();
       const replaceText = childText
-        .replace(/\n/g, '\n\n')
-        .replace(/\t/g, '')
-        .replace(/^\s+$/g, '');
+        .replace(/\n/g, "\n\n")
+        .replace(/\t/g, "")
+        .replace(/^\s+$/g, "");
 
       if (replaceText.length > 1) {
         let previousSiblingNode = childTextNode.prev();
 
         while (
-          previousSiblingNode[0] &&
-          previousSiblingNode[0].name === 'a' &&
-          previousSiblingNode.attr('grv-usedalready') !== 'yes'
+          previousSiblingNode.get(0) &&
+          previousSiblingNode.get(0).tagName === "a" &&
+          previousSiblingNode.attr("grv-usedalready") !== "yes"
         ) {
-          const outer = ' ' + doc.html(previousSiblingNode) + ' ';
+          const outer = " " + doc.html(previousSiblingNode) + " ";
           replacementText.push(outer);
           nodesToRemove.push(previousSiblingNode);
-          previousSiblingNode.attr('grv-usedalready', 'yes');
+          previousSiblingNode.attr("grv-usedalready", "yes");
           previousSiblingNode = previousSiblingNode.prev();
         }
 
@@ -183,14 +187,14 @@ function getReplacementNodes(
         const nextSiblingNode = childTextNode.next();
 
         while (
-          nextSiblingNode[0] &&
-          nextSiblingNode[0].name === 'a' &&
-          nextSiblingNode.attr('grv-usedalready') !== 'yes'
+          nextSiblingNode.get(0) &&
+          nextSiblingNode.get(0).tagName === "a" &&
+          nextSiblingNode.attr("grv-usedalready") !== "yes"
         ) {
-          const outer = ' ' + doc.html(nextSiblingNode) + ' ';
+          const outer = " " + doc.html(nextSiblingNode) + " ";
           replacementText.push(outer);
           nodesToRemove.push(nextSiblingNode);
-          nextSiblingNode.attr('grv-usedalready', 'yes');
+          nextSiblingNode.attr("grv-usedalready", "yes");
           previousSiblingNode = nextSiblingNode.next();
         }
       }
@@ -205,7 +209,7 @@ function getReplacementNodes(
 
   // flush out anything still remaining
   if (replacementText.length > 0) {
-    const text = replacementText.join('');
+    const text = replacementText.join("");
     const textNodeLoad = cheerio.load(`<p>${text}</p>`);
     const textNode = doc(textNodeLoad);
     nodesToReturn.push(textNode);
@@ -220,12 +224,12 @@ function getReplacementNodes(
 }
 
 function removeBodyClasses(doc: cheerio.Root): cheerio.Root {
-  doc('body').removeClass();
+  doc("body").removeClass();
   return doc;
 }
 
 function removeDropCaps(doc: cheerio.Root): cheerio.Root {
-  const nodes = doc('span[class~=dropcap], span[class~=drop_cap]');
+  const nodes = doc("span[class~=dropcap], span[class~=drop_cap]");
   nodes.each((_index: number, element: cheerio.Element) => {
     const htmlEl = doc(element).html();
     if (htmlEl) {
@@ -236,9 +240,9 @@ function removeDropCaps(doc: cheerio.Root): cheerio.Root {
 }
 
 function removeNodesRegex(doc: cheerio.Root, pattern: RegExp) {
-  const toRemove = doc('div').filter((_index, element) => {
-    const idEl = doc(element).attr('id');
-    const classEl = doc(element).attr('class');
+  const toRemove = doc("div").filter((_index, element) => {
+    const idEl = doc(element).attr("id");
+    const classEl = doc(element).attr("class");
     if (idEl) {
       return idEl.match(pattern) !== null;
     } else if (classEl) {
@@ -251,13 +255,13 @@ function removeNodesRegex(doc: cheerio.Root, pattern: RegExp) {
 }
 
 function removeScriptsStyles(doc: cheerio.Root): cheerio.Cheerio {
-  doc('script').remove();
-  doc('style').remove();
+  doc("script").remove();
+  doc("style").remove();
 
-  const comments = doc('*')
+  const comments = doc("*")
     .contents()
     .filter((_index: number, element: cheerio.Element) => {
-      return element.type === 'comment';
+      return element.type === "comment";
     });
 
   return doc(comments).remove();
@@ -289,8 +293,8 @@ const cleaner = (doc: cheerio.Root): cheerio.Root => {
   cleanParaSpans(doc);
   cleanUnderlines(doc);
   cleanErrantLineBreaks(doc);
-  divToPara(doc, 'div');
-  divToPara(doc, 'span');
+  divToPara(doc, "div");
+  divToPara(doc, "span");
   return doc;
 };
 
