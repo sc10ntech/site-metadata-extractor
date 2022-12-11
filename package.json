@@ -5,10 +5,11 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": [
-    "/dist"
+    "dist"
   ],
   "scripts": {
-    "build": "npm run prepare && tsc",
+    "build": "npm run clean && tsc",
+    "clean": "rimraf dist",
     "collectCoverage": "jest --collectCoverage",
     "format": "prettier --write \"src/*.{js,ts,json,md}\"",
     "prepare": "husky install",
@@ -153,28 +154,18 @@
       ]
     }
   },
-  "eslintConfig": {
-    "extends": [
-      "plugin:@typescript-eslint/recommended",
-      "prettier/@typescript-eslint",
-      "plugin:prettier/recommended"
+  "release": {
+    "branches": [
+      "master"
     ],
-    "env": {
-      "browser": true,
-      "node": true
-    },
-    "parser": "@typescript-eslint/parser",
     "plugins": [
-      "@typescript-eslint",
-      "prettier"
-    ],
-    "rules": {
-      "array-bracket-spacing": "error",
-      "new-cap": "off",
-      "prettier/prettier": "error",
-      "sort-keys": "off",
-      "space-infix-ops": "error"
-    }
+      "@semantic-release/commit-analyzer",
+      "@semantic-release/release-notes-generator",
+      "@semantic-release/changelog",
+      "@semantic-release/npm",
+      "@semantic-release/git",
+      "@semantic-release/github"
+    ]
   },
   "jest": {
     "preset": "ts-jest",
