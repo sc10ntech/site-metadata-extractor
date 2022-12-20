@@ -1,3 +1,11 @@
+## [1.0.3](https://github.com/sc10ntech/site-metadata-extractor/compare/v1.0.2...v1.0.3) (2022-12-20)
+
+
+### Bug Fixes
+
+* **configs:** adjust npm scripts; add tool-versions ([ca2a110](https://github.com/sc10ntech/site-metadata-extractor/commit/ca2a110daf463a2ed3c197840a60b679e484056d))
+* **extractor:** adjust jsonld extractor logic ([b03e736](https://github.com/sc10ntech/site-metadata-extractor/commit/b03e736af5808ccd91d13db47d3799b07398b860))
+
 ## [1.0.2](https://github.com/sc10ntech/site-metadata-extractor/compare/v1.0.1...v1.0.2) (2022-12-11)
 
 
