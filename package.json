@@ -5,10 +5,11 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "data"
   ],
   "scripts": {
-    "build": "npm run clean && tsc && cp -r data ./dist/data",
+    "build": "npm run clean && tsc",
     "clean": "rimraf dist",
     "collectCoverage": "jest --collectCoverage",
     "format": "prettier --write \"src/*.{js,ts,json,md}\"",
