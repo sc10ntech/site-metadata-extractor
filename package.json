@@ -8,7 +8,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "npm run clean && tsc",
+    "build": "npm run clean && tsc && cp -r data ./dist/data",
     "clean": "rimraf dist",
     "collectCoverage": "jest --collectCoverage",
     "format": "prettier --write \"src/*.{js,ts,json,md}\"",

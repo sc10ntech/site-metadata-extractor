@@ -4,6 +4,7 @@ import extractor from "../src/extractor";
 
 import cnbcjsonld from "./fixtures/test_cnbc2_jsonld.json";
 import engadetjsonld from "./fixtures/test_engadget2_jsonld.json";
+import sfgatejsonld from "./fixtures/test_sfgate1_jsonld.json";
 
 describe("Extractor", () => {
   it("exists", () => {
@@ -272,6 +273,16 @@ describe("Extractor", () => {
 
       const jsonld = extractor.jsonld(doc);
       expect(jsonld).toBeNull();
+    });
+
+    it("returns null if jsonld is invalid json", () => {
+      const html = fs
+        .readFileSync("tests/fixtures/test_sfgate1.html")
+        .toString();
+      const originalDoc = cheerio.load(html);
+
+      const jsonld = extractor.jsonld(originalDoc);
+      expect(JSON.stringify(jsonld)).toEqual(JSON.stringify(sfgatejsonld));
     });
 
     it("returns keywords from meta element", () => {

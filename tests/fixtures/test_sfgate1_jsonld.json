@@ -1,0 +1,34 @@
+{
+  "@context": "http://schema.org",
+  "@type": "NewsArticle",
+  "mainEntityOfPage": {
+    "@id": "https://www.sfgate.com/bayarea/article/Rare-noctilucent-clouds-appear-in-SF-Bay-Area-17659007.php"
+  },
+  "headline": "Rarest clouds in the world appear over the Bay Area",
+  "image": [
+    "https://s.hdnux.com/photos/01/30/63/57/23280610/5/ratio3x2_1800.jpg",
+    "https://s.hdnux.com/photos/01/30/63/57/23280610/5/ratio3x2_700.jpg",
+    "https://s.hdnux.com/photos/01/30/63/57/23280610/5/square_small.jpg"
+  ],
+  "articleBody": "Noctilucent clouds \u2014 the rarest clouds in the world \u2014 glowed like shimmering cobwebs in the sky over the San Francisco Bay Area early Friday morning, and experts think they were likely the result of a rocket launch.\u00a0 Skywatchers across the region were delighted by the otherworldly spectacle overhead and shared images on social media. One Twitter user posted a photo taken in the Sunset District at 6:30 a.m. \"Pretty crazy looking,\" the tweet read. Scientists chimed in with excitement. \"Great shot of what appears to be a noctilucent cloud over the SF Bay Area this morning!\" UCLA climate scientist Daniel Swain posted in response to one photo. \"Such clouds are very rare at this latitude and also in winter, and are the Earth's highest and driest clouds, forming in the mesosphere about 50 miles (!) up.\"\u00a0 The National Weather Service confirmed Bay Area residents were indeed looking at noctilucent clouds just before sunrise, and the the clouds' occurrence is highly unusual. The clouds are most prevalent in the polar regions at the North and South Poles. When they do appear on the West Coast, which isn't often, they more commonly form in the Pacific Northwest.\u00a0 \"They were being reported right around sunrise,\" Matt Mehle, a forecaster for the weather service told SFGATE on the phone. \"There are several photos floating around showing the clouds in San Francisco ... I saw a photo taken in Point Reyes.\"\u00a0 Noctilucent clouds form when water droplets crystallize around fine dust particles, resulting in clouds of ice that can reflect light from the sun. The process occurs high in the atmosphere's mesosphere, where temperatures are colder than -180 degrees Fahrenheit, according to the weather service. While most clouds float no more than 10 miles above Earth, noctilucent clouds are some 50 miles up in the sky. Cora Randall, a professor in the University of Colorado Boulder's Department of Atmospheric and Oceanic Sciences, suspects this morning's spectacle was the result of water vapor from the exhaust of the Falcon 9 SpaceX launch at Vandenberg Air Force Base in Santa Barbara at 3:50 a.m. Mehle backs Randall's hypothesis. \"That would make sense as to why we could see them around here because typically when they occur naturally it's in the Seattle area and Oregon, and not Northern California,\" said Mehle, who last saw the clouds in the Bay Area on Oct. 28, 2011, after a rocket launch at Vandenberg. Randall said the season for naturally occurring noctilucent clouds is May through August in the northern hemisphere and November through February in the southern hemisphere. \"Today is definitely outside the normal season for noctilucent clouds in the northern hemisphere,\" she wrote in an email. \"It is well known that rocket exhaust leads to noctilucent formation outside of the noctilucent seasons.\" Researchers believe the clouds may be occurring more frequently due to decreasing temperatures and/or increasing methane in the mesosphere. These effects are caused by \"anthropogenic activities,\" or human activity creating pollutants, Randall told SFGATE for a previous story with tips on how to see noctilucent clouds.\u00a0 Oakland resident Rain Hayes spotted the clouds over the Bay Area this morning from her apartment that's on the sixth floor of a building overlooking Lake Merritt. She took a photo at 6:15 a.m. with her iPhone and posted it on Twitter. \"They seemed unusually shimmery and bright and I wasn\u2019t quite sure what I was looking at,\" Hayes, who is a professional photographer told SFGATE. \"I knew the moon had already set. I\u2019m facing east with the camera, the moon sets in the west and the Oakland skyline is in the way but I didn\u2019t know how it could be illuminated by the moon. It was right between astronomical and nautical twilight. There\u2019s usually noting to bright in the sky at that time of day.\" Food | The rise of San Francisco's 'world famous turkey sandwich'Travel | A hike to the Bay Area's Alamere Falls raises questionsObscure\u00a0| The story behind that small fairy-tale village in BerkeleyHoliday\u00a0| The incredible tale behind SF's most amazing gingerbread house",
+  "datePublished": "2022-12-16T19:26:01Z",
+  "dateModified": "2022-12-16T20:45:38Z",
+  "author": [{ "@type": "Person", "name": "Amy Graff", "jobTitle": "" }],
+  "publisher": {
+    "@type": "Organization",
+    "name": "SFGATE",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.SFGate.com/img/ldjson_logo.png",
+      "width": 600,
+      "height": 60
+    },
+    "sameAs": [
+      "https://www.facebook.com/SFGate/",
+      "https://twitter.com/sfgate/",
+      "https://instagram.com/sfgate/",
+      "https://www.pinterest.com/sfgate/"
+    ]
+  },
+  "description": "Noctilucent clouds \u2014 the rarest clouds in the world \u2014 glowed like shimmering cobwebs..."
+}
