@@ -27,7 +27,7 @@ const allFields: string[] = [
 const cleanTestingText = (text: string, originalTextLength: number) => {
   return text
     .replace(/\n\n/g, " ")
-    .replace(/\ \ /g, " ")
+    .replace(/\s\s/g, " ")
     .slice(0, +(originalTextLength - 1) + 1 || 9e9);
 };
 
@@ -50,7 +50,7 @@ const checkFixture = (site: string, fields = allFields) => {
         expect(orig.expected.title).toEqual(data.title);
         expect(data.title).toEqual(dataLazy.title());
         break;
-      case "cleaned_text":
+      case "cleaned_text": {
         const origText = cleanOriginalText(orig.expected.cleaned_text);
         const newText = cleanTestingText(
           data.text ? data.text : "",
@@ -71,6 +71,7 @@ const checkFixture = (site: string, fields = allFields) => {
         expect(origText).toEqual(newText);
         expect(origText).toEqual(partialExtractText);
         break;
+      }
       case "author":
         expect(orig.expected.author.sort()).toEqual(data.author.sort());
         expect(orig.expected.author.sort()).toEqual(dataLazy.author().sort());
@@ -115,11 +116,12 @@ const checkFixture = (site: string, fields = allFields) => {
         expect(orig.expected.meta_favicon).toEqual(data.favicon);
         expect(data.favicon).toEqual(dataLazy.favicon());
         break;
-      case "tags":
+      case "tags": {
         const sortedTags = data.tags.sort();
         expect(orig.expected.tags.sort()).toEqual(sortedTags);
         expect(sortedTags).toEqual(dataLazy.tags().sort());
         break;
+      }
       case "type":
         expect(orig.expected.type).toEqual(data.type);
         expect(orig.expected.type).toEqual(dataLazy.type());
@@ -128,7 +130,7 @@ const checkFixture = (site: string, fields = allFields) => {
         expect(orig.expected.publisher).toEqual(data.publisher);
         expect(orig.expected.publisher).toEqual(dataLazy.publisher());
         break;
-      case "links":
+      case "links": {
         const sortedLinks = data?.links?.sort();
         const sortedLazyLinks = dataLazy.links().sort();
 
@@ -143,15 +145,17 @@ const checkFixture = (site: string, fields = allFields) => {
         expect(orig.expected.links.sort()).toEqual(sortedLinks);
         expect(orig.expected.links.sort()).toEqual(sortedLazyLinks);
         break;
+      }
       case "siteName":
         expect(orig.expected.origin).toEqual(data.origin);
         expect(orig.expected.origin).toEqual(dataLazy.origin());
         break;
-      case "videos":
+      case "videos": {
         const sortedVideos = data?.videos?.sort();
         expect(orig.expected.movies.sort()).toEqual(sortedVideos);
         expect(sortedVideos).toEqual(dataLazy.videos().sort());
         break;
+      }
       default:
         return;
     }

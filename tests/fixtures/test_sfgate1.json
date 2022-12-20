@@ -1,0 +1,11 @@
+{
+  "url": "https://www.sfgate.com/bayarea/article/Rare-noctilucent-clouds-appear-in-SF-Bay-Area-17659007.php",
+  "expected": {
+    "title": "Rarest clouds in the world appear over the Bay Area",
+    "meta_description": "Noctilucent clouds — the rarest clouds in the world — glowed like shimmering cobwebs in the sky over the San Francisco Bay Area early Friday morning.",
+    "domain": "www.sfgate.com",
+    "final_url": "https://www.sfgate.com/bayarea/article/Rare-noctilucent-clouds-appear-in-SF-Bay-Area-17659007.php",
+    "meta_favicon": "https://www.sfgate.com/favicon.ico",
+    "image": "https://s.hdnux.com/photos/01/30/63/57/23280610/5/rawImage.jpg"
+  }
+}
