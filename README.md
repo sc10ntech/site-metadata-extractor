@@ -91,7 +91,7 @@ const processSite = async (url) => {
 processSite('https://www.cnbc.com/guide/personal-finance-101-the-complete-guide-to-managing-your-money/`)
 	.then((data) => {
 		...
-    siteMetadataExtractor(data);
+    siteMetadataExtractor(data, "https://www.cnbc.com/guide/personal-finance-101-the-complete-guide-to-managing-your-money/", "en");
     ...
 	});
 ```
