@@ -711,13 +711,12 @@ const extractor: Extractor = {
       const jsonldObj = jsonldTag.html() || JSON.stringify("");
       try {
         const parsedJSON: NewsArticle | Article = JSON.parse(jsonldObj);
-        if (parsedJSON) {
-          if (!Array.isArray(parsedJSON)) {
-            return parsedJSON;
-          }
+        if (parsedJSON && typeof parsedJSON === "object") {
+          return parsedJSON;
         }
       } catch (e) {
-        console.error(`Error in jsonld parse - ${e}`);
+        console.warn(`Error in jsonld parse - ${e}`);
+        return null;
       }
     }
     return null;
