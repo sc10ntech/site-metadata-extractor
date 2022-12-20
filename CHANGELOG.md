@@ -1,3 +1,10 @@
+## [1.0.4](https://github.com/sc10ntech/site-metadata-extractor/compare/v1.0.3...v1.0.4) (2022-12-20)
+
+
+### Bug Fixes
+
+* **pathing:** fix and adjust stopwords pathing ([da39b14](https://github.com/sc10ntech/site-metadata-extractor/commit/da39b142cc63a4976f27e3964d604cd5f422ec33))
+
 ## [1.0.3](https://github.com/sc10ntech/site-metadata-extractor/compare/v1.0.2...v1.0.3) (2022-12-20)
 
 
