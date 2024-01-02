@@ -4,7 +4,7 @@ import stopwords from "./stopwords";
 
 export const addNewlineToBr = (
   doc: cheerio.Root,
-  topNode: cheerio.Cheerio
+  topNode: cheerio.Cheerio,
 ): cheerio.Root => {
   const brs = topNode.find("br");
 
@@ -24,7 +24,7 @@ export const cleanParagraphText = (rawText: string): string => {
 
 export const convertToText = (
   doc: cheerio.Root,
-  topNode: cheerio.Cheerio
+  topNode: cheerio.Cheerio,
 ): string => {
   let texts: string[] = [];
   const nodes = topNode.contents();
@@ -74,7 +74,7 @@ export const convertToText = (
 
 export const linksToText = (
   doc: cheerio.Root,
-  topNode: cheerio.Cheerio
+  topNode: cheerio.Cheerio,
 ): cheerio.Root => {
   const nodes = topNode.find("a");
   nodes.each((_index: number, element: cheerio.Element) => {
@@ -89,7 +89,7 @@ export const linksToText = (
 export const removeFewWordsParagraphs = (
   doc: cheerio.Root,
   topNode: cheerio.Cheerio,
-  lang: string
+  lang: string,
 ): cheerio.Root => {
   const allNodes = topNode.find("*");
 
@@ -119,7 +119,7 @@ export const removeFewWordsParagraphs = (
 
 export const removeNegativescoresNodes = (
   doc: cheerio.Root,
-  topNode: cheerio.Cheerio
+  topNode: cheerio.Cheerio,
 ): cheerio.Root => {
   const gravityItems = topNode.find("*[gravityScore]");
 
@@ -142,7 +142,7 @@ export const removeNegativescoresNodes = (
 export const replaceCharacters = (
   text: string,
   html: boolean,
-  chars: boolean
+  chars: boolean,
 ): string => {
   let processedText = text;
   // if element does not match any in map and starts with & and ends with ;, replace with empty string
@@ -188,7 +188,7 @@ export const replaceCharacters = (
 
 export const replaceWithText = (
   doc: cheerio.Root,
-  topNode: cheerio.Cheerio
+  topNode: cheerio.Cheerio,
 ): cheerio.Root => {
   const nodes = topNode.find("b, strong, i, br, sup");
   nodes.each((_index: number, element: cheerio.Element) => {
@@ -211,7 +211,7 @@ export const ulToText = (doc: cheerio.Root, node: cheerio.Cheerio): string => {
 const formatter = (
   doc: cheerio.Root,
   topNode: cheerio.Cheerio,
-  lang: string
+  lang: string,
 ): string => {
   removeNegativescoresNodes(doc, topNode);
   linksToText(doc, topNode);

@@ -58,7 +58,7 @@ export interface LazyExtractor {
 const siteMetadataExtractor = (
   markup: string,
   resourceUrl: string,
-  lang = "en"
+  lang = "en",
 ): PageData => {
   const resourceUrlObj = new URL(resourceUrl);
   const doc = cheerio.load(markup, { xmlMode: true });
@@ -105,7 +105,7 @@ export default siteMetadataExtractor;
 export const lazy = (
   html: string,
   resourceUrl: string,
-  language = "en"
+  language = "en",
 ): LazyExtractor => {
   const resourceUrlObj = new URL(resourceUrl);
   global.lazyPageData = global.lazyPageData || {};
@@ -120,7 +120,7 @@ export const lazy = (
       const doc = getParsedDoc.call(global, html);
       global.lazyPageData.canonicalLink = extractor.canonicalLink(
         doc,
-        resourceUrl
+        resourceUrl,
       );
       return global.lazyPageData.canonicalLink;
     },

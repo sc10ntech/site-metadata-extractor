@@ -27,7 +27,7 @@ const stopwords = (content: string, lang = "en"): StopWords => {
 
   if (!fs.existsSync(filePath)) {
     console.warn(
-      `WARNING: No stopwords file found for '${lang}' - defaulting to English!`
+      `WARNING: No stopwords file found for '${lang}' - defaulting to English!`,
     );
     filePath = getFilePath("en");
   }
