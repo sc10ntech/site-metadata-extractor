@@ -266,13 +266,13 @@ describe("Extractor", () => {
       expect(JSON.stringify(jsonld)).toEqual(JSON.stringify(cnbcjsonld));
     });
 
-    it("returns nothing if jsonld is neither of an article or news article page", () => {
+    it("returns empty object if jsonld is neither of an article or news article page", () => {
       const doc = cheerio.load(
         '<html><head><meta property="og:site_name" content="Polygon" /><meta name="author" content="Griffin McElroy" /></head><body><p>Hello world!!</p></body></html>'
       );
 
       const jsonld = extractor.jsonld(doc);
-      expect(jsonld).toBeNull();
+      expect(jsonld).toEqual({});
     });
 
     it("returns null if jsonld is invalid json", () => {
