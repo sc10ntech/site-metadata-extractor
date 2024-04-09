@@ -1,3 +1,11 @@
+## [1.0.5](https://github.com/sc10ntech/site-metadata-extractor/compare/v1.0.4...v1.0.5) (2024-04-09)
+
+
+### Bug Fixes
+
+* **lib:** fix topNode calculation; adjust json extractor ([628d4c0](https://github.com/sc10ntech/site-metadata-extractor/commit/628d4c0662f1de4709224eda6b53196f8105352f))
+* **tests:** rm some tests for the time being ([454c256](https://github.com/sc10ntech/site-metadata-extractor/commit/454c256ef1ca80f32ec87932b10466184ef093b9))
+
 ## [1.0.4](https://github.com/sc10ntech/site-metadata-extractor/compare/v1.0.3...v1.0.4) (2022-12-20)
 
 
