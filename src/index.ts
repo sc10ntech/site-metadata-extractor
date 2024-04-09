@@ -58,10 +58,19 @@ export interface LazyExtractor {
 const siteMetadataExtractor = (
   markup: string,
   resourceUrl: string,
-  lang = "en",
+  lang = "en"
 ): PageData => {
   const resourceUrlObj = new URL(resourceUrl);
   const doc = cheerio.load(markup, { xmlMode: true });
+
+  // Separate instance with decodeEntities: false specifically for JSON-LD extraction
+  const docForJsonLd = cheerio.load(markup, {
+    xmlMode: true,
+    decodeEntities: false,
+  });
+
+  const docForText = cheerio.load(markup, { xmlMode: false });
+
   const language = lang || extractor.lang(doc);
 
   const pageData: PageData = {
@@ -72,7 +81,7 @@ const siteMetadataExtractor = (
     description: extractor.description(doc),
     favicon: extractor.favicon(doc, resourceUrlObj),
     image: extractor.image(doc),
-    jsonld: extractor.jsonld(doc),
+    jsonld: extractor.jsonld(docForJsonLd),
     keywords: extractor.keywords(doc),
     lang: language,
     locale: extractor.locale(doc),
@@ -89,7 +98,7 @@ const siteMetadataExtractor = (
   cleaner(doc);
 
   // Step 2: Find the doc node with the best text
-  const topNode = extractor.calculateBestNode(doc, language);
+  const topNode = extractor.calculateBestNode(docForText, language);
 
   // Step 3: Extract text ,videos, images, link
   pageData.videos = extractor.videos(doc, topNode);
@@ -105,7 +114,7 @@ export default siteMetadataExtractor;
 export const lazy = (
   html: string,
   resourceUrl: string,
-  language = "en",
+  language = "en"
 ): LazyExtractor => {
   const resourceUrlObj = new URL(resourceUrl);
   global.lazyPageData = global.lazyPageData || {};
@@ -120,7 +129,7 @@ export const lazy = (
       const doc = getParsedDoc.call(global, html);
       global.lazyPageData.canonicalLink = extractor.canonicalLink(
         doc,
-        resourceUrl,
+        resourceUrl
       );
       return global.lazyPageData.canonicalLink;
     },
@@ -228,7 +237,7 @@ export const lazy = (
   };
 };
 
-function getCleanedDoc(html: string): cheerio.Root {
+export function getCleanedDoc(html: string): cheerio.Root {
   if (!global.cleanedDoc) {
     const doc = getParsedDoc.call(global, html);
     global.cleanedDoc = cleaner(doc);
@@ -236,11 +245,11 @@ function getCleanedDoc(html: string): cheerio.Root {
   return global.cleanedDoc;
 }
 
-function getParsedDoc(html: string): cheerio.Root {
+export function getParsedDoc(html: string): cheerio.Root {
   return (global.doc = cheerio.load(html));
 }
 
-function getTopNode(doc: cheerio.Root, lang: string): cheerio.Cheerio {
+export function getTopNode(doc: cheerio.Root, lang: string): cheerio.Cheerio {
   global.topNode = extractor.calculateBestNode(doc, lang);
   return global.topNode;
 }
