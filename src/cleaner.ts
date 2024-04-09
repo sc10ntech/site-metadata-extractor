@@ -64,7 +64,7 @@ function cleanErrantLineBreaks(doc: cheerio.Root) {
       const contentsNode = doc(cElement);
       if (contentsNode && contentsNode[0] && contentsNode[0].type === "text") {
         contentsNode.replaceWith(
-          contentsNode.text().replace(/([^\n])\n([^\n])/g, "$1 $2"),
+          contentsNode.text().replace(/([^\n])\n([^\n])/g, "$1 $2")
         );
       }
     });
@@ -135,7 +135,7 @@ function divToPara(doc: cheerio.Root, domType: string) {
 
 function getReplacementNodes(
   doc: cheerio.Root,
-  div: cheerio.Cheerio,
+  div: cheerio.Cheerio
 ): cheerio.Cheerio[] {
   let replacementText: string[] = [];
   const nodesToReturn: cheerio.Cheerio[] = [];
@@ -269,7 +269,7 @@ function removeScriptsStyles(doc: cheerio.Root): cheerio.Cheerio {
 
 function replaceWithPara(
   doc: cheerio.Root,
-  div: cheerio.Element,
+  div: cheerio.Element
 ): cheerio.Root {
   const divContent = doc(div).html();
   doc(div).replaceWith(`<p>${divContent}</p>`);
@@ -296,6 +296,12 @@ const cleaner = (doc: cheerio.Root): cheerio.Root => {
   divToPara(doc, "div");
   divToPara(doc, "span");
   return doc;
+};
+
+// Sanitization function to remove HTML/XML tags
+export const sanitizeJsonLdString = (jsonLdString: string): string => {
+  // Remove anything that looks like an HTML/XML tag (this is a basic example, might need adjustments)
+  return jsonLdString.replace(/<\/?[^>]+(>|$)/g, "").trim();
 };
 
 export default cleaner;
