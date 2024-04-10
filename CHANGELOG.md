@@ -1,3 +1,10 @@
+## [1.0.6](https://github.com/sc10ntech/site-metadata-extractor/compare/v1.0.5...v1.0.6) (2024-04-10)
+
+
+### Bug Fixes
+
+* **extractor:** lazy extractor has some extractors ref a more robust parsed doc for topNode calc ([08901da](https://github.com/sc10ntech/site-metadata-extractor/commit/08901dab36aa48e7c913dce10be8d06b797bb957))
+
 ## [1.0.5](https://github.com/sc10ntech/site-metadata-extractor/compare/v1.0.4...v1.0.5) (2024-04-09)
 
 
