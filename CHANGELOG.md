@@ -1,3 +1,10 @@
+## [1.0.7](https://github.com/sc10ntech/site-metadata-extractor/compare/v1.0.6...v1.0.7) (2024-04-10)
+
+
+### Bug Fixes
+
+* **various:** fix formatting/lints - etc ([23b44c4](https://github.com/sc10ntech/site-metadata-extractor/commit/23b44c4c358c29718e6a8486faad99878bec9116))
+
 ## [1.0.6](https://github.com/sc10ntech/site-metadata-extractor/compare/v1.0.5...v1.0.6) (2024-04-10)
 
 
