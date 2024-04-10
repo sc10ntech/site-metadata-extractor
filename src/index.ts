@@ -179,7 +179,7 @@ export const lazy = (
       return global.lazyPageData.locale;
     },
     links() {
-      let doc = getParsedDoc.call(global, html);
+      let doc = getParsedDocForText.call(global, html);
       const topNode = getTopNode.call(global, doc, this.lang());
       doc = cleaner(doc);
       global.lazyPageData.links = extractor.links(doc, topNode, this.lang());
@@ -210,7 +210,7 @@ export const lazy = (
       return global.lazyPageData.tags;
     },
     text() {
-      let doc = getParsedDoc.call(global, html);
+      let doc = getParsedDocForText.call(global, html);
       doc = cleaner(doc);
       const topNode = getTopNode.call(global, doc, this.lang());
       const textData = extractor.text(doc, topNode, this.lang());
@@ -228,7 +228,7 @@ export const lazy = (
       return global.lazyPageData.type;
     },
     videos() {
-      let doc = getParsedDoc.call(global, html);
+      let doc = getParsedDocForText.call(global, html);
       doc = cleaner(doc);
       const topNode = getTopNode.call(global, doc, this.lang());
       global.lazyPageData.videos = extractor.videos(doc, topNode);
@@ -247,6 +247,10 @@ export function getCleanedDoc(html: string): cheerio.Root {
 
 export function getParsedDoc(html: string): cheerio.Root {
   return (global.doc = cheerio.load(html));
+}
+
+export function getParsedDocForText(html: string): cheerio.Root {
+  return (global.doc = cheerio.load(html, { xmlMode: false }));
 }
 
 export function getTopNode(doc: cheerio.Root, lang: string): cheerio.Cheerio {
