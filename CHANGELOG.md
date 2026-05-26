@@ -1,3 +1,32 @@
+## Unreleased
+
+### Features
+
+* add `extractFromHtml`, `extractMetadataOnly`, and instance-local `extractLazy`
+  APIs for typed public-HTML metadata extraction
+* export `ExtractedResource`, `AssetCandidate`, `ExtractedLink`, and
+  `ExtractedVideo` output types
+* add canonical URL, favicon candidate, image candidate, JSON-LD array, raw meta,
+  readable text stats, warning, and confidence fields for predictable ingestion
+
+### Bug Fixes
+
+* resolve relative canonical, favicon, image, link, and video URLs against
+  `finalUrl`/`inputUrl` in the typed API
+* bound oversized metadata strings and preserve escaped hostile tag-shaped text
+  as inert readable text
+* avoid logging malformed JSON-LD from the typed API; parse failures are returned
+  as extraction warnings
+
+### Notes
+
+* the legacy default export and legacy `lazy` API are preserved for backward
+  compatibility
+* this package still performs no network fetching; callers remain responsible
+  for fetch policy and SSRF protections
+* `npm audit fix` reduced audit findings, but residual advisories remain for
+  bundled `npm` dependencies and `html-minifier`, which currently has no fix
+
 ## [1.0.7](https://github.com/sc10ntech/site-metadata-extractor/compare/v1.0.6...v1.0.7) (2024-04-10)
 
 
