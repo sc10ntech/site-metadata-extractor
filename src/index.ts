@@ -1,6 +1,8 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import cheerio from "cheerio";
+import * as cheerio from "cheerio";
+import type { Cheerio, CheerioAPI, CheerioOptions } from "cheerio";
+import type { AnyNode, Element } from "domhandler";
 import { NewsArticle, Article } from "schema-dts";
 import { URL } from "url";
 
@@ -147,6 +149,11 @@ const DEFAULT_MAX_READABLE_TEXT_LENGTH = 200000;
 
 const packageVersion = require("../package.json").version as string;
 
+function getTagName(node: Cheerio<AnyNode>): string {
+  const element = node.get(0) as Element | undefined;
+  return element?.tagName || "";
+}
+
 function getBaseUrl(options: ExtractOptions): string {
   return options.finalUrl || options.inputUrl || "";
 }
@@ -229,13 +236,13 @@ function pushUniqueCandidate(
 }
 
 function getRawMeta(
-  doc: cheerio.Root,
+  doc: CheerioAPI,
   warnings: string[],
   maxLength: number,
 ): Record<string, string[]> {
   const rawMeta: Record<string, string[]> = {};
 
-  doc("meta").each((_index: number, element: cheerio.Element) => {
+  doc("meta").each((_index: number, element: AnyNode) => {
     const meta = doc(element);
     const key =
       meta.attr("property") ||
@@ -279,7 +286,7 @@ function firstMetaValue(
 }
 
 function getDateValue(
-  doc: cheerio.Root,
+  doc: CheerioAPI,
   rawMeta: Record<string, string[]>,
   keys: string[],
 ): string {
@@ -308,13 +315,13 @@ function getDateValue(
 }
 
 function getFaviconCandidates(
-  doc: cheerio.Root,
+  doc: CheerioAPI,
   baseUrl: string,
   maxCandidates: number,
 ): AssetCandidate[] {
   const candidates: AssetCandidate[] = [];
 
-  doc("link").each((_index: number, element: cheerio.Element) => {
+  doc("link").each((_index: number, element: AnyNode) => {
     const link = doc(element);
     const rel = (link.attr("rel") || "").toLowerCase();
     if (!/\b(icon|apple-touch-icon|mask-icon)\b/.test(rel)) {
@@ -348,7 +355,7 @@ function getFaviconCandidates(
 }
 
 function getImageCandidates(
-  doc: cheerio.Root,
+  doc: CheerioAPI,
   baseUrl: string,
   maxCandidates: number,
 ): AssetCandidate[] {
@@ -363,7 +370,7 @@ function getImageCandidates(
   ];
 
   metaSelectors.forEach((selector) => {
-    doc(selector).each((_index: number, element: cheerio.Element) => {
+    doc(selector).each((_index: number, element: AnyNode) => {
       const meta = doc(element);
       const url = resolveHttpUrl(meta.attr("content"), baseUrl);
       pushUniqueCandidate(
@@ -378,7 +385,7 @@ function getImageCandidates(
     });
   });
 
-  doc("link[rel='image_src']").each((_index: number, element: cheerio.Element) => {
+  doc("link[rel='image_src']").each((_index: number, element: AnyNode) => {
     const link = doc(element);
     const url = resolveHttpUrl(link.attr("href"), baseUrl);
     pushUniqueCandidate(
@@ -388,7 +395,7 @@ function getImageCandidates(
     );
   });
 
-  doc("img").each((_index: number, element: cheerio.Element) => {
+  doc("img").each((_index: number, element: AnyNode) => {
     const img = doc(element);
     const url = resolveHttpUrl(
       img.attr("src") || img.attr("data-src") || img.attr("data-original"),
@@ -410,11 +417,11 @@ function getImageCandidates(
   return candidates;
 }
 
-function parseJsonLd(doc: cheerio.Root, warnings: string[]): unknown[] {
+function parseJsonLd(doc: CheerioAPI, warnings: string[]): unknown[] {
   const jsonld: unknown[] = [];
 
   doc('script[type="application/ld+json"]').each(
-    (index: number, element: cheerio.Element) => {
+    (index: number, element: AnyNode) => {
       const raw = doc(element).html() || "";
       const trimmed = raw.trim();
       if (!trimmed) {
@@ -527,13 +534,13 @@ function getReadableParts(
 }
 
 function getLinks(
-  doc: cheerio.Root,
-  topNode: cheerio.Cheerio,
+  doc: CheerioAPI,
+  topNode: Cheerio<AnyNode>,
   baseUrl: string,
 ): ExtractedLink[] {
   const links: ExtractedLink[] = [];
 
-  topNode.find("a").each((_index: number, element: cheerio.Element) => {
+  topNode.find("a").each((_index: number, element: AnyNode) => {
     const anchor = doc(element);
     const url = resolveHttpUrl(anchor.attr("href"), baseUrl);
     const text = anchor.text().replace(/\s\s+/g, " ").trim();
@@ -552,16 +559,16 @@ function getLinks(
 }
 
 function getVideos(
-  doc: cheerio.Root,
-  topNode: cheerio.Cheerio,
+  doc: CheerioAPI,
+  topNode: Cheerio<AnyNode>,
   baseUrl: string,
 ): ExtractedVideo[] {
   const videos: ExtractedVideo[] = [];
 
   topNode.find("iframe, embed, object, video, source").each(
-    (_index: number, element: cheerio.Element) => {
+    (_index: number, element: AnyNode) => {
       const candidate = doc(element);
-      const tag = candidate.get(0).tagName;
+      const tag = getTagName(candidate);
       const src =
         candidate.attr("src") ||
         candidate.attr("data-src") ||
@@ -603,7 +610,7 @@ function buildMetadata(
   const docForJsonLd = cheerio.load(html, {
     decodeEntities: false,
     xmlMode: true,
-  });
+  } as CheerioOptions);
   const rawMeta = getRawMeta(doc, warnings, maxStringLength);
   const language = options.lang || extractor.lang(doc) || "";
   const canonicalCandidate =
@@ -769,7 +776,7 @@ const siteMetadataExtractor = (
   const docForJsonLd = cheerio.load(markup, {
     xmlMode: true,
     decodeEntities: false,
-  });
+  } as CheerioOptions);
 
   const docForText = cheerio.load(markup, { xmlMode: false });
 
@@ -939,7 +946,7 @@ export const lazy = (
   };
 };
 
-export function getCleanedDoc(html: string): cheerio.Root {
+export function getCleanedDoc(html: string): CheerioAPI {
   if (!global.cleanedDoc) {
     const doc = getParsedDoc.call(global, html);
     global.cleanedDoc = cleaner(doc);
@@ -947,15 +954,15 @@ export function getCleanedDoc(html: string): cheerio.Root {
   return global.cleanedDoc;
 }
 
-export function getParsedDoc(html: string): cheerio.Root {
+export function getParsedDoc(html: string): CheerioAPI {
   return (global.doc = cheerio.load(html));
 }
 
-export function getParsedDocForText(html: string): cheerio.Root {
+export function getParsedDocForText(html: string): CheerioAPI {
   return (global.doc = cheerio.load(html, { xmlMode: false }));
 }
 
-export function getTopNode(doc: cheerio.Root, lang: string): cheerio.Cheerio {
+export function getTopNode(doc: CheerioAPI, lang: string): Cheerio<AnyNode> {
   global.topNode = extractor.calculateBestNode(doc, lang);
   return global.topNode;
 }

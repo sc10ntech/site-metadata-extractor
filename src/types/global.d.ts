@@ -1,10 +1,11 @@
 /* eslint-disable no-var */
-import cheerio from "cheerio";
+import type { Cheerio, CheerioAPI } from "cheerio";
+import type { AnyNode, Element } from "domhandler";
 import { PageData } from "../index";
 
 declare global {
-  var cleanedDoc: cheerio.Root;
-  var doc: cheerio.Root;
+  var cleanedDoc: CheerioAPI;
+  var doc: CheerioAPI;
   var lazyPageData: PageData;
-  var topNode: cheerio.Cheerio;
+  var topNode: Cheerio<AnyNode>;
 }

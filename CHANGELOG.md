@@ -17,6 +17,9 @@
   as inert readable text
 * avoid logging malformed JSON-LD from the typed API; parse failures are returned
   as extraction warnings
+* remove unused dependencies and upgrade Cheerio to the current stable parser
+* update GitHub Actions release/CI jobs to current action versions and explicit
+  supported Node versions
 
 ### Notes
 
@@ -24,8 +27,7 @@
   compatibility
 * this package still performs no network fetching; callers remain responsible
   for fetch policy and SSRF protections
-* `npm audit fix` reduced audit findings, but residual advisories remain for
-  bundled `npm` dependencies and `html-minifier`, which currently has no fix
+* `npm audit` reports zero known vulnerabilities after the dependency hardening
 
 ## [1.0.7](https://github.com/sc10ntech/site-metadata-extractor/compare/v1.0.6...v1.0.7) (2024-04-10)
 
