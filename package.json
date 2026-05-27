@@ -45,8 +45,6 @@
   "devDependencies": {
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.2.2",
-    "@semantic-release/changelog": "^6.0.2",
-    "@semantic-release/git": "^10.0.1",
     "@types/jest": "^29.2.4",
     "@types/lodash": "^4.14.149",
     "@types/node": "^24.1.0",
@@ -70,9 +68,7 @@
     "plugins": [
       "@semantic-release/commit-analyzer",
       "@semantic-release/release-notes-generator",
-      "@semantic-release/changelog",
       "@semantic-release/npm",
-      "@semantic-release/git",
       "@semantic-release/github"
     ]
   },
