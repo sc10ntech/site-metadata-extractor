@@ -1,14 +1,20 @@
-import cheerio from "cheerio";
+import type { Cheerio, CheerioAPI } from "cheerio";
+import type { AnyNode, Element } from "domhandler";
 import xregexp from "xregexp";
 import stopwords from "./stopwords";
 
+function getTagName(node: Cheerio<AnyNode>): string {
+  const element = node.get(0) as Element | undefined;
+  return element?.tagName || "";
+}
+
 export const addNewlineToBr = (
-  doc: cheerio.Root,
-  topNode: cheerio.Cheerio,
-): cheerio.Root => {
+  doc: CheerioAPI,
+  topNode: Cheerio<AnyNode>,
+): CheerioAPI => {
   const brs = topNode.find("br");
 
-  brs.each((_index: number, element: cheerio.Element) => {
+  brs.each((_index: number, element: AnyNode) => {
     const br = doc(element);
     br.replaceWith("\n\n");
   });
@@ -23,18 +29,19 @@ export const cleanParagraphText = (rawText: string): string => {
 };
 
 export const convertToText = (
-  doc: cheerio.Root,
-  topNode: cheerio.Cheerio,
+  doc: CheerioAPI,
+  topNode: Cheerio<AnyNode>,
 ): string => {
   let texts: string[] = [];
   const nodes = topNode.contents();
 
   let hangingText = "";
 
-  nodes.each((_index: number, element: cheerio.Element) => {
+  nodes.each((_index: number, element: AnyNode) => {
     const node = doc(element);
-    const nodeType = node.get(0) ? node.get(0).type : null;
-    const nodeName = node.get(0) ? node.get(0).tagName : null;
+    const firstNode = node.get(0);
+    const nodeType = firstNode ? firstNode.type : null;
+    const nodeName = getTagName(node);
 
     if (nodeType === "text") {
       hangingText += node.text();
@@ -73,11 +80,11 @@ export const convertToText = (
 };
 
 export const linksToText = (
-  doc: cheerio.Root,
-  topNode: cheerio.Cheerio,
-): cheerio.Root => {
+  doc: CheerioAPI,
+  topNode: Cheerio<AnyNode>,
+): CheerioAPI => {
   const nodes = topNode.find("a");
-  nodes.each((_index: number, element: cheerio.Element) => {
+  nodes.each((_index: number, element: AnyNode) => {
     const htmlEl = doc(element).html();
     if (htmlEl) {
       doc(element).replaceWith(htmlEl);
@@ -87,15 +94,15 @@ export const linksToText = (
 };
 
 export const removeFewWordsParagraphs = (
-  doc: cheerio.Root,
-  topNode: cheerio.Cheerio,
+  doc: CheerioAPI,
+  topNode: Cheerio<AnyNode>,
   lang: string,
-): cheerio.Root => {
+): CheerioAPI => {
   const allNodes = topNode.find("*");
 
-  allNodes.each((_index: number, element: cheerio.Element) => {
+  allNodes.each((_index: number, element: AnyNode) => {
     const el = doc(element);
-    const tag = el.get(0).tagName;
+    const tag = getTagName(el);
     const text = el.text();
 
     const stopWords = stopwords(text, lang);
@@ -118,12 +125,12 @@ export const removeFewWordsParagraphs = (
 };
 
 export const removeNegativescoresNodes = (
-  doc: cheerio.Root,
-  topNode: cheerio.Cheerio,
-): cheerio.Root => {
+  doc: CheerioAPI,
+  topNode: Cheerio<AnyNode>,
+): CheerioAPI => {
   const gravityItems = topNode.find("*[gravityScore]");
 
-  gravityItems.each((_index: number, element: cheerio.Element) => {
+  gravityItems.each((_index: number, element: AnyNode) => {
     let score = 0;
     const item = doc(element);
     const gravityScore = item.attr("gravityScore");
@@ -187,21 +194,21 @@ export const replaceCharacters = (
 };
 
 export const replaceWithText = (
-  doc: cheerio.Root,
-  topNode: cheerio.Cheerio,
-): cheerio.Root => {
+  doc: CheerioAPI,
+  topNode: Cheerio<AnyNode>,
+): CheerioAPI => {
   const nodes = topNode.find("b, strong, i, br, sup");
-  nodes.each((_index: number, element: cheerio.Element) => {
+  nodes.each((_index: number, element: AnyNode) => {
     doc(element).replaceWith(doc(element).text());
   });
   return doc;
 };
 
-export const ulToText = (doc: cheerio.Root, node: cheerio.Cheerio): string => {
+export const ulToText = (doc: CheerioAPI, node: Cheerio<AnyNode>): string => {
   const nodes = node.find("li");
   let text = "";
 
-  nodes.each((_index: number, element: cheerio.Element) => {
+  nodes.each((_index: number, element: AnyNode) => {
     text = `${text}\n * ${doc(element).text()}`;
   });
   text = `${text}\n`;
@@ -209,8 +216,8 @@ export const ulToText = (doc: cheerio.Root, node: cheerio.Cheerio): string => {
 };
 
 const formatter = (
-  doc: cheerio.Root,
-  topNode: cheerio.Cheerio,
+  doc: CheerioAPI,
+  topNode: Cheerio<AnyNode>,
   lang: string,
 ): string => {
   removeNegativescoresNodes(doc, topNode);

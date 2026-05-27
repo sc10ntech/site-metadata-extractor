@@ -11,13 +11,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Setup Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
-          node-version: "lts/*"
+          node-version: "24.10.0"
+          cache: npm
       - name: Remove prepare script
         run: npm pkg delete scripts.prepare
       - name: Install dependencies

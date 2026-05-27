@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import type { Cheerio, CheerioAPI } from "cheerio";
+import type { AnyNode, Element } from "domhandler";
 import isEqual from "lodash/isEqual";
 import uniq from "lodash/uniq";
 import { NewsArticle, Article } from "schema-dts";
@@ -6,6 +8,11 @@ import { URL } from "url";
 import formatter, { replaceCharacters } from "./formatter";
 import { sanitizeJsonLdString } from "./cleaner";
 import stopwords from "./stopwords";
+
+function getTagName(node: Cheerio<AnyNode>): string {
+  const element = node.get(0) as Element | undefined;
+  return element?.tagName || "";
+}
 
 export interface LinkObj {
   href: string;
@@ -19,42 +26,42 @@ export interface VideoAttrs {
 }
 
 export interface Extractor {
-  author: (doc: cheerio.Root) => string[];
-  calculateBestNode: (doc: cheerio.Root, lang: string) => cheerio.Cheerio;
-  canonicalLink: (doc: cheerio.Root, resourceUrl: string) => string;
-  copyright: (doc: cheerio.Root) => string;
-  date: (doc: cheerio.Root) => string;
-  description: (doc: cheerio.Root) => string;
-  favicon: (doc: cheerio.Root, resourceUrlObj: URL) => string;
-  image: (doc: cheerio.Root) => string;
-  jsonld: (doc: cheerio.Root) => NewsArticle | Article | null;
-  keywords: (doc: cheerio.Root) => string;
-  lang: (doc: cheerio.Root) => string;
+  author: (doc: CheerioAPI) => string[];
+  calculateBestNode: (doc: CheerioAPI, lang: string) => Cheerio<AnyNode>;
+  canonicalLink: (doc: CheerioAPI, resourceUrl: string) => string;
+  copyright: (doc: CheerioAPI) => string;
+  date: (doc: CheerioAPI) => string;
+  description: (doc: CheerioAPI) => string;
+  favicon: (doc: CheerioAPI, resourceUrlObj: URL) => string;
+  image: (doc: CheerioAPI) => string;
+  jsonld: (doc: CheerioAPI) => NewsArticle | Article | null;
+  keywords: (doc: CheerioAPI) => string;
+  lang: (doc: CheerioAPI) => string;
   links: (
-    doc: cheerio.Root,
-    topNode: cheerio.Cheerio,
+    doc: CheerioAPI,
+    topNode: Cheerio<AnyNode>,
     lang: string,
   ) => LinkObj[];
-  locale: (doc: cheerio.Root) => string;
-  publisher: (doc: cheerio.Root) => string;
-  siteName: (doc: cheerio.Root) => string;
-  softTitle: (doc: cheerio.Root) => string;
-  tags: (doc: cheerio.Root) => string[];
-  text: (doc: cheerio.Root, topNode: cheerio.Cheerio, lang: string) => string;
-  title: (doc: cheerio.Root) => string;
-  type: (doc: cheerio.Root) => string;
-  videos: (doc: cheerio.Root, topNode: cheerio.Cheerio) => VideoAttrs[];
+  locale: (doc: CheerioAPI) => string;
+  publisher: (doc: CheerioAPI) => string;
+  siteName: (doc: CheerioAPI) => string;
+  softTitle: (doc: CheerioAPI) => string;
+  tags: (doc: CheerioAPI) => string[];
+  text: (doc: CheerioAPI, topNode: Cheerio<AnyNode>, lang: string) => string;
+  title: (doc: CheerioAPI) => string;
+  type: (doc: CheerioAPI) => string;
+  videos: (doc: CheerioAPI, topNode: Cheerio<AnyNode>) => VideoAttrs[];
 }
 
 function addSiblings(
-  doc: cheerio.Root,
-  topNode: cheerio.Cheerio,
+  doc: CheerioAPI,
+  topNode: Cheerio<AnyNode>,
   lang: string,
-): cheerio.Cheerio {
+): Cheerio<AnyNode> {
   const baselineScoreSiblingsPara = getSiblingsScore(doc, topNode, lang);
   const sibs = topNode.prevAll();
 
-  sibs.each((_index: number, element: cheerio.Element) => {
+  sibs.each((_index: number, element: AnyNode) => {
     const currentNode = doc(element);
     const ps = getSiblingsContent(
       doc,
@@ -64,7 +71,7 @@ function addSiblings(
     );
 
     if (ps) {
-      ps.forEach((p: cheerio.Cheerio | string) => {
+      ps.forEach((p: Cheerio<AnyNode> | string) => {
         topNode.prepend(`<p>${p}</p>`);
       });
     }
@@ -123,8 +130,8 @@ function cleanTitle(title: string, delimiters: string[]): string {
 }
 
 function doesNodeListContainNode(
-  list: cheerio.Cheerio[],
-  node: cheerio.Cheerio,
+  list: Cheerio<AnyNode>[],
+  node: Cheerio<AnyNode>,
 ): boolean {
   let contains = false;
   for (let i = 0; i < list.length; i++) {
@@ -136,7 +143,7 @@ function doesNodeListContainNode(
   return contains;
 }
 
-function getObjectTag(doc: cheerio.Root, node: cheerio.Cheerio) {
+function getObjectTag(doc: CheerioAPI, node: Cheerio<AnyNode>) {
   const srcNode = node.find("param[name=movie]");
   if (srcNode.length > 0) {
     const src = srcNode.attr("value");
@@ -148,13 +155,13 @@ function getObjectTag(doc: cheerio.Root, node: cheerio.Cheerio) {
 }
 
 function getSiblingsContent(
-  doc: cheerio.Root,
+  doc: CheerioAPI,
   lang: string,
-  currentSibling: cheerio.Cheerio,
+  currentSibling: Cheerio<AnyNode>,
   baselineScoreSiblingsPara: number,
 ) {
   if (
-    currentSibling.get(0).tagName === "p" &&
+    getTagName(currentSibling) === "p" &&
     currentSibling.text().length > 0
   ) {
     return [currentSibling];
@@ -164,7 +171,7 @@ function getSiblingsContent(
       return null;
     } else {
       const ps: string[] = [];
-      potentialParagraphs.each((_index: number, element: cheerio.Element) => {
+      potentialParagraphs.each((_index: number, element: AnyNode) => {
         const firstParagraph = doc(element);
         const text = firstParagraph.text();
 
@@ -186,8 +193,8 @@ function getSiblingsContent(
 }
 
 function getSiblingsScore(
-  doc: cheerio.Root,
-  topNode: cheerio.Cheerio,
+  doc: CheerioAPI,
+  topNode: Cheerio<AnyNode>,
   lang: string,
 ): number {
   const nodesToCheck = topNode.find("p");
@@ -195,7 +202,7 @@ function getSiblingsScore(
   let paragraphsNumber = 0;
   let paragraphScore = 0;
 
-  nodesToCheck.each((_index: number, element: cheerio.Element) => {
+  nodesToCheck.each((_index: number, element: AnyNode) => {
     const node = doc(element);
     const textNode = node.text();
     const wordStats = stopwords(textNode, lang);
@@ -213,7 +220,7 @@ function getSiblingsScore(
   return base;
 }
 
-function getScore(node: cheerio.Cheerio): number {
+function getScore(node: Cheerio<AnyNode>): number {
   const gravityScoreString = node.attr("gravityScore");
   if (!gravityScoreString) {
     return 0;
@@ -222,7 +229,7 @@ function getScore(node: cheerio.Cheerio): number {
   }
 }
 
-function getVideoAttrs(doc: cheerio.Root, node: cheerio.Cheerio): VideoAttrs {
+function getVideoAttrs(doc: CheerioAPI, node: Cheerio<AnyNode>): VideoAttrs {
   const el = doc(node);
   return {
     height: el.attr("height"),
@@ -247,8 +254,8 @@ function isAbsoluteUrl(url: string): boolean {
 }
 
 function isBoostable(
-  doc: cheerio.Root,
-  node: cheerio.Cheerio,
+  doc: CheerioAPI,
+  node: Cheerio<AnyNode>,
   lang: string,
 ): boolean {
   const minimumStopWordCount = 5;
@@ -258,9 +265,9 @@ function isBoostable(
   const nodes = node.prevAll();
   let boostable = false;
 
-  nodes.each((_index: number, element: cheerio.Element) => {
+  nodes.each((_index: number, element: AnyNode) => {
     const currentNode = doc(element);
-    const currentNodeTag = currentNode.get(0).tagName;
+    const currentNodeTag = getTagName(currentNode);
 
     if (currentNodeTag === "p") {
       if (stepsAway >= maxStepsAwayFromNode) {
@@ -283,7 +290,7 @@ function isBoostable(
   return boostable;
 }
 
-function isHighLinkDensity(doc: cheerio.Root, node: cheerio.Cheerio): boolean {
+function isHighLinkDensity(doc: CheerioAPI, node: Cheerio<AnyNode>): boolean {
   const links = node.find("a");
   if (links.length > 0) {
     const text = node.text();
@@ -291,7 +298,7 @@ function isHighLinkDensity(doc: cheerio.Root, node: cheerio.Cheerio): boolean {
     const numberOfWords = words.length;
 
     const sb: string[] = [];
-    links.each((_index: number, element: cheerio.Element) => {
+    links.each((_index: number, element: AnyNode) => {
       sb.push(doc(element).text());
     });
 
@@ -310,16 +317,16 @@ function isHighLinkDensity(doc: cheerio.Root, node: cheerio.Cheerio): boolean {
 }
 
 function isNodeScoreThresholdMet(
-  _doc: cheerio.Root,
-  node: cheerio.Cheerio,
-  e: cheerio.Cheerio,
+  _doc: CheerioAPI,
+  node: Cheerio<AnyNode>,
+  e: Cheerio<AnyNode>,
 ): boolean {
   const topNodeScore = getScore(node);
   const currentNodeScore = getScore(e);
   const thresholdScore = topNodeScore * 0.08;
 
   const elIsTdUlOlOrBlockQ = ["td", "ul", "ol", "blockquote"].includes(
-    e.get(0).tagName,
+    getTagName(e),
   );
   if (currentNodeScore < thresholdScore && !elIsTdUlOlOrBlockQ) {
     return false;
@@ -328,10 +335,10 @@ function isNodeScoreThresholdMet(
   return true;
 }
 
-function isTableAndNoParaExist(doc: cheerio.Root, e: cheerio.Cheerio): boolean {
+function isTableAndNoParaExist(doc: CheerioAPI, e: Cheerio<AnyNode>): boolean {
   const subParagraphs = e.find("p");
 
-  subParagraphs.each((_index: number, element: cheerio.Element) => {
+  subParagraphs.each((_index: number, element: AnyNode) => {
     const p = doc(element);
     const text = p.text();
 
@@ -341,7 +348,7 @@ function isTableAndNoParaExist(doc: cheerio.Root, e: cheerio.Cheerio): boolean {
   });
 
   const subParagraphsTwo = e.find("p");
-  const elIsTdUlOrOl = ["td", "ul", "ol"].includes(e.get(0).tagName);
+  const elIsTdUlOrOl = ["td", "ul", "ol"].includes(getTagName(e));
   if (subParagraphsTwo.length === 0 && !elIsTdUlOrOl) {
     return true;
   }
@@ -354,15 +361,15 @@ function isValidDate(d: string): boolean {
 }
 
 function postCleanup(
-  doc: cheerio.Root,
-  targetNode: cheerio.Cheerio,
+  doc: CheerioAPI,
+  targetNode: Cheerio<AnyNode>,
   lang: string,
-): cheerio.Cheerio {
+): Cheerio<AnyNode> {
   const node = addSiblings(doc, targetNode, lang);
 
-  node.children().each((_index: number, element: cheerio.Element) => {
+  node.children().each((_index: number, element: AnyNode) => {
     const el = doc(element);
-    const elTag = el.get(0).tagName;
+    const elTag = getTagName(el);
     if (!["p", "a"].includes(elTag)) {
       if (
         isHighLinkDensity(doc, el) ||
@@ -377,7 +384,7 @@ function postCleanup(
   return node;
 }
 
-function rawTitle(doc: cheerio.Root) {
+function rawTitle(doc: CheerioAPI) {
   let gotTitle = false;
   let titleText = "";
 
@@ -396,7 +403,7 @@ function rawTitle(doc: cheerio.Root) {
   return titleText;
 }
 
-function updateNodeCount(node: cheerio.Cheerio, addToCount: number): void {
+function updateNodeCount(node: Cheerio<AnyNode>, addToCount: number): void {
   const countString = node.attr("gravityNodes");
   let currentScore = 0;
 
@@ -408,7 +415,7 @@ function updateNodeCount(node: cheerio.Cheerio, addToCount: number): void {
   node.attr("gravityNodes", `${newScore}`);
 }
 
-function updateScore(node: cheerio.Cheerio, addToScore: number): void {
+function updateScore(node: Cheerio<AnyNode>, addToScore: number): void {
   const scoreString = node.attr("gravityScore");
   let currentScore = 0;
 
@@ -421,14 +428,14 @@ function updateScore(node: cheerio.Cheerio, addToScore: number): void {
 }
 
 const extractor: Extractor = {
-  author: (doc: cheerio.Root): string[] => {
+  author: (doc: CheerioAPI): string[] => {
     const authorCandidates = doc(
       "meta[property='article:author'], meta[property='og:article:author'], meta[name='author'], meta[name='dcterms.creator'], meta[name='DC.creator'], meta[name='DC.Creator'], meta[name='dc.creator'], meta[name='creator']",
     );
 
     const authorList = [];
 
-    authorCandidates.each((_index: number, element: cheerio.Element) => {
+    authorCandidates.each((_index: number, element: AnyNode) => {
       const author = cleanNull(doc(element).attr("content"));
       if (author) {
         authorList.push(author.trim());
@@ -450,17 +457,17 @@ const extractor: Extractor = {
     }
     return authorList;
   },
-  calculateBestNode: (doc: cheerio.Root, lang: string): cheerio.Cheerio => {
-    let topNode: cheerio.Cheerio | null = null;
+  calculateBestNode: (doc: CheerioAPI, lang: string): Cheerio<AnyNode> => {
+    let topNode: Cheerio<AnyNode> | null = null;
     const nodesToCheck = doc("p, pre, td");
 
-    const parentNodes: cheerio.Cheerio[] = [];
-    const nodesWithText: cheerio.Cheerio[] = [];
+    const parentNodes: Cheerio<AnyNode>[] = [];
+    const nodesWithText: Cheerio<AnyNode>[] = [];
     let startingBoost = 1.0;
     let cnt = 0;
     let i = 0;
 
-    nodesToCheck.each((_index: number, element: cheerio.Element) => {
+    nodesToCheck.each((_index: number, element: AnyNode) => {
       const node = doc(element);
 
       const textNode = node.text();
@@ -476,7 +483,7 @@ const extractor: Extractor = {
     const bottomNegativeScoreNodes = nodesNumber * 0.25;
     const negativeScoring = 0;
 
-    nodesWithText.forEach((node: cheerio.Cheerio) => {
+    nodesWithText.forEach((node: Cheerio<AnyNode>) => {
       let boostScore = 0.0;
 
       if (isBoostable(doc, node, lang) === true) {
@@ -547,10 +554,10 @@ const extractor: Extractor = {
       }
     });
 
-    return doc(topNode);
+    return topNode ? doc(topNode) : doc([]);
   },
   // if it gets to the end without one of these links or meta tags, return the original url as canonical
-  canonicalLink: (doc: cheerio.Root, resourceUrl: string): string => {
+  canonicalLink: (doc: CheerioAPI, resourceUrl: string): string => {
     const canonicalLinkTag = doc(
       "link[rel='canonical'], meta[property='og:url']",
     );
@@ -559,7 +566,7 @@ const extractor: Extractor = {
       // check if it is link or meta
       if (
         canonicalLinkTag.get(0) &&
-        canonicalLinkTag.get(0).tagName === "link"
+        getTagName(canonicalLinkTag) === "link"
       ) {
         const cleanedCanonicalLink = cleanNull(
           canonicalLinkTag.first().attr("href"),
@@ -571,7 +578,7 @@ const extractor: Extractor = {
         return cleanedCanonicalLink;
       } else if (
         canonicalLinkTag.get(0) &&
-        canonicalLinkTag.get(0).tagName === "meta"
+        getTagName(canonicalLinkTag) === "meta"
       ) {
         let cleanedCanonicalMeta = cleanNull(canonicalLinkTag.attr("content"));
         // check if resourceUrl protocol is https? if so, use that
@@ -589,7 +596,7 @@ const extractor: Extractor = {
     // return original url
     return resourceUrl;
   },
-  copyright: (doc: cheerio.Root): string => {
+  copyright: (doc: CheerioAPI): string => {
     const copyrightCandidates = doc(
       "p[class*='copyright'], div[class*='copyright'], span[class*='copyright'], li[class*='copyright'], p[id*='copyright'], div[id*='copyright'], span[id*='copyright'], li[id*='copyright']",
     );
@@ -608,7 +615,7 @@ const extractor: Extractor = {
     }
     return "";
   },
-  date: (doc: cheerio.Root): string => {
+  date: (doc: CheerioAPI): string => {
     const dateCandidates = doc(
       "meta[property='article:published_time'], \
     meta[itemprop*='datePublished'], meta[name='dcterms.modified'], \
@@ -667,7 +674,7 @@ const extractor: Extractor = {
 
     return dateToReturn;
   },
-  description: (doc: cheerio.Root): string => {
+  description: (doc: CheerioAPI): string => {
     const descriptionTag = doc(
       "meta[name=description], meta[property='og:description']",
     );
@@ -681,7 +688,7 @@ const extractor: Extractor = {
     }
     return "";
   },
-  favicon: (doc: cheerio.Root, resourceUrlObj: URL): string => {
+  favicon: (doc: CheerioAPI, resourceUrlObj: URL): string => {
     const tag = doc("link").filter(
       (_index, el) =>
         doc(el).attr("rel")?.toLowerCase() === "shortcut icon" ||
@@ -695,7 +702,7 @@ const extractor: Extractor = {
     }
     return faviconLink;
   },
-  image: (doc: cheerio.Root): string => {
+  image: (doc: CheerioAPI): string => {
     const images = doc(
       "meta[property='og:image'], meta[property='og:image:url'], meta[itemprop=image], meta[name='twitter:image:src'], meta[name='twitter:image'], meta[name='twitter:image0']",
     );
@@ -706,7 +713,7 @@ const extractor: Extractor = {
     }
     return "";
   },
-  jsonld: (doc: cheerio.Root): NewsArticle | Article | null => {
+  jsonld: (doc: CheerioAPI): NewsArticle | Article | null => {
     const jsonldTag = doc('script[type="application/ld+json"]');
     if (jsonldTag) {
       let jsonldObj = jsonldTag.html() || "{}";
@@ -723,7 +730,7 @@ const extractor: Extractor = {
     }
     return null;
   },
-  keywords: (doc: cheerio.Root): string => {
+  keywords: (doc: CheerioAPI): string => {
     const keywordsTag = doc('meta[name="keywords"]');
     if (keywordsTag) {
       const cleansedKeywords = cleanNull(keywordsTag.attr("content"));
@@ -733,7 +740,7 @@ const extractor: Extractor = {
     }
     return "";
   },
-  lang: (doc: cheerio.Root): string => {
+  lang: (doc: CheerioAPI): string => {
     let language = doc("html").attr("lang");
     if (!language) {
       const tag =
@@ -751,15 +758,15 @@ const extractor: Extractor = {
     return "";
   },
   links: (
-    doc: cheerio.Root,
-    topNode: cheerio.Cheerio,
+    doc: CheerioAPI,
+    topNode: Cheerio<AnyNode>,
     lang: string,
   ): LinkObj[] => {
     const links: LinkObj[] = [];
 
     const gatherLinks = () => {
       const nodes = topNode.find("a");
-      nodes.each((_index: number, element: cheerio.Element) => {
+      nodes.each((_index: number, element: AnyNode) => {
         const href = doc(element).attr("href");
         const text = doc(element).html();
         if (href && text) {
@@ -777,7 +784,7 @@ const extractor: Extractor = {
     }
     return links;
   },
-  locale: (doc: cheerio.Root): string => {
+  locale: (doc: CheerioAPI): string => {
     const localeTag = doc("meta[property='og:locale']");
     if (localeTag) {
       const cleanedLocale = cleanNull(localeTag.first().attr("content"));
@@ -787,7 +794,7 @@ const extractor: Extractor = {
     }
     return "";
   },
-  publisher: (doc: cheerio.Root): string => {
+  publisher: (doc: CheerioAPI): string => {
     const publisherCandidates = doc(
       "meta[property='og:site_name'], meta[itemprop=name], meta[name='dc.publisher'], meta[name='DC.publisher'], meta[name='DC.Publisher']",
     );
@@ -801,7 +808,7 @@ const extractor: Extractor = {
     }
     return "";
   },
-  siteName: (doc: cheerio.Root): string => {
+  siteName: (doc: CheerioAPI): string => {
     const siteNameTag = doc(
       "meta[property='og:site_name'], meta[itemprop=name]",
     );
@@ -814,11 +821,11 @@ const extractor: Extractor = {
     return "";
   },
   // Grab the title with soft truncation
-  softTitle: (doc: cheerio.Root): string => {
+  softTitle: (doc: CheerioAPI): string => {
     const titleText = rawTitle(doc);
     return cleanTitle(titleText, ["|", " - ", "»"]);
   },
-  tags: (doc: cheerio.Root): string[] => {
+  tags: (doc: CheerioAPI): string[] => {
     let elements = doc("a[rel='tag']");
     if (elements.length === 0) {
       elements = doc(
@@ -830,7 +837,7 @@ const extractor: Extractor = {
     }
 
     const tags: string[] = [];
-    elements.each((_index: number, element: cheerio.Element) => {
+    elements.each((_index: number, element: AnyNode) => {
       const tag = doc(element);
       const tagText = tag.text().trim();
       tagText.replace(/[\s\t\n]+/g, "");
@@ -842,7 +849,7 @@ const extractor: Extractor = {
 
     return uniq(tags);
   },
-  text: (doc: cheerio.Root, topNode: cheerio.Cheerio, lang: string): string => {
+  text: (doc: CheerioAPI, topNode: Cheerio<AnyNode>, lang: string): string => {
     if (topNode) {
       topNode = postCleanup(doc, topNode, lang);
       return formatter(doc, topNode, lang);
@@ -852,12 +859,12 @@ const extractor: Extractor = {
   },
   // Grab the title of an html doc (excluding junk)
   // Hard-truncates titles containing colon or spaced dash
-  title: (doc: cheerio.Root): string => {
+  title: (doc: CheerioAPI): string => {
     const titleText = rawTitle(doc);
     const cleanedTitle = cleanTitle(titleText, ["|", " - ", "»", ":"]);
     return replaceCharacters(cleanedTitle, false, true);
   },
-  type: (doc: cheerio.Root): string => {
+  type: (doc: CheerioAPI): string => {
     const typeTag = doc("meta[property='og:type']");
     if (typeTag) {
       const cleanedType = cleanNull(typeTag.first().attr("content"));
@@ -867,18 +874,18 @@ const extractor: Extractor = {
     }
     return "";
   },
-  videos: (doc: cheerio.Root, topNode: cheerio.Cheerio): VideoAttrs[] => {
+  videos: (doc: CheerioAPI, topNode: Cheerio<AnyNode>): VideoAttrs[] => {
     const videolist: VideoAttrs[] = [];
     const videoCandidates = doc(topNode).find("iframe, embed, object, video");
 
-    videoCandidates.each((_index: number, element: cheerio.Element) => {
+    videoCandidates.each((_index: number, element: AnyNode) => {
       const candidate = doc(element);
-      const tag = candidate.get(0).tagName;
+      const tag = getTagName(candidate);
 
       if (tag === "embed") {
         if (
           candidate.parent() &&
-          candidate.parent().get(0).tagName === "object"
+          getTagName(candidate.parent()) === "object"
         ) {
           videolist.push(getObjectTag(doc, candidate));
         } else {

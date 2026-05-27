@@ -1,5 +1,6 @@
-import cheerio from "cheerio";
+import * as cheerio from "cheerio";
 import fs from "fs";
+import type { Text } from "domhandler";
 import cleaner from "../src/cleaner";
 
 describe("Cleaner", () => {
@@ -126,7 +127,8 @@ describe("Cleaner", () => {
     const newDoc = cleaner(originalDoc);
 
     const pElements = newDoc("p");
-    const cleanedParaText = pElements.get(9).children[0].data;
+    const cleanedParaText = (pElements.get(9)?.children[0] as Text | undefined)
+      ?.data;
     expect(cleanedParaText?.trim()).toEqual(
       "“This transaction would not only strengthen our global presence, but also demonstrate our commitment to diversify and expand our U.S. commercial portfolio with meaningful new therapies,” said Russell Cox, executive vice president and chief operating officer of Jazz Pharmaceuticals plc. “We look forward to ongoing discussions with the FDA as we continue our efforts toward submission of an NDA for defibrotide in the U.S. Patients in the U.S. with severe VOD have a critical unmet medical need, and we believe that defibrotide has the potential to become an important treatment option for these patients.”"
     );

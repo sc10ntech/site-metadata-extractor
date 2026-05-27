@@ -1,8 +1,15 @@
-import cheerio from "cheerio";
+import * as cheerio from "cheerio";
+import type { Cheerio, CheerioAPI } from "cheerio";
+import type { AnyNode, Element } from "domhandler";
 
-function cleanArticleTags(doc: cheerio.Root) {
+function getTagName(node: Cheerio<AnyNode>): string {
+  const element = node.get(0) as Element | undefined;
+  return element?.tagName || "";
+}
+
+function cleanArticleTags(doc: CheerioAPI) {
   const articles = doc("article");
-  articles.each((_index: number, element: cheerio.Element) => {
+  articles.each((_index: number, element: AnyNode) => {
     doc(element).removeAttr("id");
     doc(element).removeAttr("name");
     doc(element).removeAttr("class");
@@ -10,7 +17,7 @@ function cleanArticleTags(doc: cheerio.Root) {
   return doc;
 }
 
-function cleanBadTags(doc: cheerio.Root) {
+function cleanBadTags(doc: CheerioAPI) {
   const removeNodesRe =
     "^side$|combx|retweet|mediaarticlerelated|menucontainer|navbar|partner-gravity-ad|video-full-transcript|storytopbar-bucket|utility-bar|inline-share-tools|comment|PopularQuestions|contact|foot|footer|Footer|footnote|cnn_strycaptiontxt|cnn_html_slideshow|cnn_strylftcntnt|links|meta$|shoutbox|sponsor|tags|socialnetworking|socialNetworking|cnnStryHghLght|cnn_stryspcvbx|^inset$|pagetools|post-attributes|welcome_form|contentTools2|the_answers|communitypromo|runaroundLeft|subscribe|vcard|articleheadings|date|^print$|popup|author-dropdown|tools|socialtools|byline|konafilter|KonaFilter|breadcrumbs|^fn$|wp-caption-text|legende|ajoutVideo|timestamp|js_replies";
   const regex = new RegExp(removeNodesRe, "i");
@@ -33,17 +40,17 @@ function cleanBadTags(doc: cheerio.Root) {
   return doc;
 }
 
-function cleanCodeBlocks(doc: cheerio.Root) {
+function cleanCodeBlocks(doc: CheerioAPI) {
   const nodes = doc("[class*='highlight-'], pre code, code, pre, ul.task-list");
-  nodes.each((_index: number, element: cheerio.Element) => {
+  nodes.each((_index: number, element: AnyNode) => {
     doc(element).replaceWith(doc(element).text());
   });
   return doc;
 }
 
-function cleanEmTags(doc: cheerio.Root) {
+function cleanEmTags(doc: CheerioAPI) {
   const ems = doc("em");
-  ems.each((_index: number, element: cheerio.Element) => {
+  ems.each((_index: number, element: AnyNode) => {
     const images = ems.find("img");
     if (images.length === 0) {
       const htmlEl = doc(element).html();
@@ -55,12 +62,12 @@ function cleanEmTags(doc: cheerio.Root) {
   return doc;
 }
 
-function cleanErrantLineBreaks(doc: cheerio.Root) {
-  doc("p").each((_index: number, element: cheerio.Element) => {
+function cleanErrantLineBreaks(doc: CheerioAPI) {
+  doc("p").each((_index: number, element: AnyNode) => {
     const node = doc(element);
     const contents = node.contents();
 
-    doc(contents).each((_cindex: number, cElement: cheerio.Element) => {
+    doc(contents).each((_cindex: number, cElement: AnyNode) => {
       const contentsNode = doc(cElement);
       if (contentsNode && contentsNode[0] && contentsNode[0].type === "text") {
         contentsNode.replaceWith(
@@ -72,9 +79,9 @@ function cleanErrantLineBreaks(doc: cheerio.Root) {
   return doc;
 }
 
-function cleanParaSpans(doc: cheerio.Root) {
+function cleanParaSpans(doc: CheerioAPI) {
   const nodes = doc("p span");
-  nodes.each((_index: number, element: cheerio.Element) => {
+  nodes.each((_index: number, element: AnyNode) => {
     const htmlEl = doc(element).html();
     if (htmlEl) {
       doc(element).replaceWith(htmlEl);
@@ -83,9 +90,9 @@ function cleanParaSpans(doc: cheerio.Root) {
   return doc;
 }
 
-function cleanUnderlines(doc: cheerio.Root) {
+function cleanUnderlines(doc: CheerioAPI) {
   const nodes = doc("u");
-  nodes.each((_index: number, element: cheerio.Element) => {
+  nodes.each((_index: number, element: AnyNode) => {
     const htmlEl = doc(element).html();
     if (htmlEl) {
       doc(element).replaceWith(htmlEl);
@@ -94,7 +101,7 @@ function cleanUnderlines(doc: cheerio.Root) {
   return doc;
 }
 
-function divToPara(doc: cheerio.Root, domType: string) {
+function divToPara(doc: CheerioAPI, domType: string) {
   const divs = doc(domType);
 
   const tags = [
@@ -110,7 +117,7 @@ function divToPara(doc: cheerio.Root, domType: string) {
     "ul",
   ];
 
-  divs.each((_index: number, element: cheerio.Element) => {
+  divs.each((_index: number, element: AnyNode) => {
     const div = doc(element);
     const items = div.find(tags.join(", "));
 
@@ -134,25 +141,24 @@ function divToPara(doc: cheerio.Root, domType: string) {
 }
 
 function getReplacementNodes(
-  doc: cheerio.Root,
-  div: cheerio.Cheerio,
-): cheerio.Cheerio[] {
+  doc: CheerioAPI,
+  div: Cheerio<AnyNode>,
+): Cheerio<AnyNode>[] {
   let replacementText: string[] = [];
-  const nodesToReturn: cheerio.Cheerio[] = [];
-  const nodesToRemove: cheerio.Cheerio[] = [];
+  const nodesToReturn: Cheerio<AnyNode>[] = [];
+  const nodesToRemove: Cheerio<AnyNode>[] = [];
   const children = div.contents();
 
   children.each((_index: number, element) => {
     const child = doc(element);
 
     if (
-      child.get(0) &&
-      child.get(0).tagName === "p" &&
+      getTagName(child) === "p" &&
       replacementText.length > 0
     ) {
       const text = replacementText.join("");
       const textNodeLoad = cheerio.load(`<p>${text}</p>`);
-      const textNode = doc(textNodeLoad);
+      const textNode = textNodeLoad("p");
       // create a node out of text and push
       nodesToReturn.push(textNode);
       replacementText = [];
@@ -160,7 +166,7 @@ function getReplacementNodes(
       if (childEl) {
         nodesToReturn.push(childEl);
       }
-    } else if (child.get(0) && child.get(0).type === "text") {
+    } else if (child.get(0)?.type === "text") {
       const childTextNode = child;
       const childText = child.text();
       const replaceText = childText
@@ -172,8 +178,7 @@ function getReplacementNodes(
         let previousSiblingNode = childTextNode.prev();
 
         while (
-          previousSiblingNode.get(0) &&
-          previousSiblingNode.get(0).tagName === "a" &&
+          getTagName(previousSiblingNode) === "a" &&
           previousSiblingNode.attr("grv-usedalready") !== "yes"
         ) {
           const outer = " " + doc.html(previousSiblingNode) + " ";
@@ -187,8 +192,7 @@ function getReplacementNodes(
         const nextSiblingNode = childTextNode.next();
 
         while (
-          nextSiblingNode.get(0) &&
-          nextSiblingNode.get(0).tagName === "a" &&
+          getTagName(nextSiblingNode) === "a" &&
           nextSiblingNode.attr("grv-usedalready") !== "yes"
         ) {
           const outer = " " + doc.html(nextSiblingNode) + " ";
@@ -211,26 +215,26 @@ function getReplacementNodes(
   if (replacementText.length > 0) {
     const text = replacementText.join("");
     const textNodeLoad = cheerio.load(`<p>${text}</p>`);
-    const textNode = doc(textNodeLoad);
+    const textNode = textNodeLoad("p");
     nodesToReturn.push(textNode);
     replacementText = [];
   }
 
-  nodesToRemove.forEach((node: cheerio.Cheerio) => {
+  nodesToRemove.forEach((node: Cheerio<AnyNode>) => {
     doc(node).remove();
   });
 
   return nodesToReturn;
 }
 
-function removeBodyClasses(doc: cheerio.Root): cheerio.Root {
+function removeBodyClasses(doc: CheerioAPI): CheerioAPI {
   doc("body").removeClass();
   return doc;
 }
 
-function removeDropCaps(doc: cheerio.Root): cheerio.Root {
+function removeDropCaps(doc: CheerioAPI): CheerioAPI {
   const nodes = doc("span[class~=dropcap], span[class~=drop_cap]");
-  nodes.each((_index: number, element: cheerio.Element) => {
+  nodes.each((_index: number, element: AnyNode) => {
     const htmlEl = doc(element).html();
     if (htmlEl) {
       doc(element).replaceWith(htmlEl);
@@ -239,7 +243,7 @@ function removeDropCaps(doc: cheerio.Root): cheerio.Root {
   return doc;
 }
 
-function removeNodesRegex(doc: cheerio.Root, pattern: RegExp) {
+function removeNodesRegex(doc: CheerioAPI, pattern: RegExp) {
   const toRemove = doc("div").filter((_index, element) => {
     const idEl = doc(element).attr("id");
     const classEl = doc(element).attr("class");
@@ -254,13 +258,13 @@ function removeNodesRegex(doc: cheerio.Root, pattern: RegExp) {
   return doc;
 }
 
-function removeScriptsStyles(doc: cheerio.Root): cheerio.Cheerio {
+function removeScriptsStyles(doc: CheerioAPI): Cheerio<AnyNode> {
   doc("script").remove();
   doc("style").remove();
 
   const comments = doc("*")
     .contents()
-    .filter((_index: number, element: cheerio.Element) => {
+    .filter((_index: number, element: AnyNode) => {
       return element.type === "comment";
     });
 
@@ -268,15 +272,15 @@ function removeScriptsStyles(doc: cheerio.Root): cheerio.Cheerio {
 }
 
 function replaceWithPara(
-  doc: cheerio.Root,
-  div: cheerio.Element,
-): cheerio.Root {
+  doc: CheerioAPI,
+  div: AnyNode,
+): CheerioAPI {
   const divContent = doc(div).html();
   doc(div).replaceWith(`<p>${divContent}</p>`);
   return doc;
 }
 
-const cleaner = (doc: cheerio.Root): cheerio.Root => {
+const cleaner = (doc: CheerioAPI): CheerioAPI => {
   removeBodyClasses(doc);
   cleanArticleTags(doc);
   cleanEmTags(doc);

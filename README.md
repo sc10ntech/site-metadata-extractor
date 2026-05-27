@@ -46,6 +46,57 @@ $ yarn add site-metadata-extractor
 
 Feed in a raw markup from a webpage to get extracted metadata fields.
 
+### Modern typed API
+
+The typed API is additive. The default export remains available for existing
+callers, while new callers can pass already-fetched public HTML into:
+
+```ts
+import {
+  extractFromHtml,
+  extractMetadataOnly,
+  extractLazy,
+  type ExtractedResource,
+} from "site-metadata-extractor";
+
+const resource: ExtractedResource = extractFromHtml(html, {
+  inputUrl: "https://example.com/requested-url",
+  finalUrl: "https://example.com/final-url",
+  lang: "en",
+});
+```
+
+This package does not fetch network resources. Fetch HTML in the calling
+application, apply any SSRF/private-network protections there, then pass the
+HTML string into the extractor.
+
+`extractFromHtml(html, options)` returns stable typed output for ingestion:
+
+- URL fields: `inputUrl`, `finalUrl`, `canonicalUrl`, `normalizedUrl`, `domain`
+- metadata: `title`, `softTitle`, `description`, `author`, `publisher`,
+  `siteName`, `lang`, `locale`, `publishedAt`, `modifiedAt`
+- assets: `faviconCandidates`, `imageCandidates`, `primaryImage`
+- structured/raw data: `jsonld`, `rawMeta`
+- content: `links`, `videos`, `readableText`, `textStats`
+- extraction metadata: `extraction.packageVersion`,
+  `extraction.strategyVersion`, `extraction.warnings`, `extraction.confidence`
+
+`extractMetadataOnly(html, options)` returns the same shape but skips readable
+text, link, and video extraction.
+
+`extractLazy(html, options)` uses instance-local caches and exposes:
+`metadata()`, `readableText()`, `links()`, `videos()`, and `extract()`.
+
+Exported output types include `ExtractedResource`, `AssetCandidate`,
+`ExtractedLink`, `ExtractedVideo`, `TextStats`, and `ExtractionMetadata`.
+
+Migration note: the legacy default export still returns the historical field
+names such as `canonicalLink`, `favicon`, `image`, and `text`. New integrations
+should prefer `extractFromHtml` so candidate URLs are resolved against
+`finalUrl`/`inputUrl`, JSON-LD is always an array, oversized metadata is bounded,
+and malformed JSON-LD is reported in `extraction.warnings` instead of being
+logged.
+
 **From `.html` file:**
 
 ```js

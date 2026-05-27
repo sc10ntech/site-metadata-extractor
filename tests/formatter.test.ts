@@ -1,4 +1,4 @@
-import cheerio from "cheerio";
+import * as cheerio from "cheerio";
 import fs from "fs";
 import formatter from "../src/formatter";
 
