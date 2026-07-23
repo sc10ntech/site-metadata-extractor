@@ -1,6 +1,6 @@
 /* eslint-disable no-var */
 import type { Cheerio, CheerioAPI } from "cheerio";
-import type { AnyNode, Element } from "domhandler";
+import type { AnyNode } from "domhandler";
 import { PageData } from "../index";
 
 declare global {

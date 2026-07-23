@@ -5,6 +5,7 @@ import type { Cheerio, CheerioAPI, CheerioOptions } from "cheerio";
 import type { AnyNode, Element } from "domhandler";
 import { NewsArticle, Article } from "schema-dts";
 import { URL } from "url";
+import packageInfo from "../package.json";
 
 import cleaner from "./cleaner";
 import extractor, { LinkObj, VideoAttrs } from "./extractor";
@@ -147,7 +148,7 @@ const DEFAULT_MAX_STRING_LENGTH = 4096;
 const DEFAULT_MAX_CANDIDATES = 25;
 const DEFAULT_MAX_READABLE_TEXT_LENGTH = 200000;
 
-const packageVersion = require("../package.json").version as string;
+const packageVersion = packageInfo.version;
 
 function getTagName(node: Cheerio<AnyNode>): string {
   const element = node.get(0) as Element | undefined;
