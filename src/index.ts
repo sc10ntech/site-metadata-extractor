@@ -142,7 +142,7 @@ export interface LazyExtractedResource {
   extract: () => ExtractedResource;
 }
 
-const STRATEGY_VERSION = "2026-09-28.cheerio-v2";
+const STRATEGY_VERSION = "2026-10-21.cheerio-v3";
 const DEFAULT_MAX_STRING_LENGTH = 4096;
 const DEFAULT_MAX_CANDIDATES = 25;
 const DEFAULT_MAX_READABLE_TEXT_LENGTH = 200000;
@@ -474,13 +474,16 @@ function pageJsonLd(jsonld: unknown[], pageUrl: string): Record<string, unknown>
     const types = Array.isArray(item["@type"]) ? item["@type"] : [item["@type"]];
     return types.some((type) => pageTypes.has(jsonString(type).replace(/^https?:\/\/schema\.org\//, "")));
   });
-  const matches = candidates.filter((item) => {
+  const pageIdentifiers = (item: Record<string, unknown>): string[] => {
     const mainEntity = item.mainEntityOfPage;
-    const urls = [item.url, item["@id"], isJsonObject(mainEntity) ? mainEntity["@id"] : mainEntity];
-    return urls.some((value) => {
-      if (!jsonString(value) || !pageUrl) return false;
+    return [item.url, item["@id"], isJsonObject(mainEntity) ? mainEntity["@id"] : mainEntity]
+      .map(jsonString).filter(Boolean);
+  };
+  const matches = candidates.filter((item) => {
+    return pageIdentifiers(item).some((value) => {
+      if (!pageUrl) return false;
       try {
-        const candidate = new URL(jsonString(value), pageUrl);
+        const candidate = new URL(value, pageUrl);
         const page = new URL(pageUrl);
         candidate.hash = "";
         page.hash = "";
@@ -489,7 +492,12 @@ function pageJsonLd(jsonld: unknown[], pageUrl: string): Record<string, unknown>
     });
   });
   if (matches.length === 1) return matches[0];
-  return candidates.length === 1 ? candidates[0] : {};
+  // A lone recommendation can still identify another page. Uniqueness alone
+  // does not justify borrowing its metadata when the requested page is known.
+  if (candidates.length === 1 && (!pageUrl || pageIdentifiers(candidates[0]).length === 0)) {
+    return candidates[0];
+  }
+  return {};
 }
 
 function getTextStats(text: string, truncated: boolean): TextStats {

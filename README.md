@@ -165,7 +165,7 @@ processSite('https://www.cnbc.com/guide/personal-finance-101-the-complete-guide-
 
 ## Readable text and structured metadata
 
-The `2026-09-28.cheerio-v2` strategy preserves `html`, `body` and `main` when
+The `2026-10-21.cheerio-v3` strategy preserves `html`, `body` and `main` when
 layout attributes contain noise terms such as `tools`. Descendant noise removal
 and inert-text handling remain in place. Missing title, description, author,
 publisher and dates can fall back to one page entity in JSON-LD, including
@@ -174,10 +174,14 @@ names are supported; arbitrary `@id` reference resolution is not implemented.
 Ambiguous page entities do not get merged. This is heuristic extraction, not a
 complete visual-page archive, and it does not execute JavaScript or fetch URLs.
 
-September 28 verification: 115 tests and TypeScript compilation pass. A scoped
-ESLint run still flags the pre-existing CommonJS `require` used for package
-version loading in `src/index.ts`; this change does not add that lint exception.
-These changes are pending release; no npm publication is performed by this PR.
+A sole entity explicitly identifying another page is also ignored. A sole entity
+without a page identifier can supply missing metadata; multiple matching entities
+remain ambiguous. The strategy version changes when these selection rules change.
+
+October 21 verification: lint, TypeScript build, 120 tests and the built-package
+smoke check pass against the dependencies merged in #936. These source changes
+are pending release. Consumers with pinned versions or local patches need a
+separately verified package upgrade to receive them.
 
 ## Development
 
