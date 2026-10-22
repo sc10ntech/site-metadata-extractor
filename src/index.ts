@@ -147,6 +147,8 @@ const DEFAULT_MAX_STRING_LENGTH = 4096;
 const DEFAULT_MAX_CANDIDATES = 25;
 const DEFAULT_MAX_READABLE_TEXT_LENGTH = 200000;
 
+// A static JSON import moves emitted JavaScript under dist/src, breaking main.
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const packageVersion = require("../package.json").version as string;
 
 function getTagName(node: Cheerio<AnyNode>): string {
