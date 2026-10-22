@@ -199,7 +199,6 @@ function getReplacementNodes(
           replacementText.push(outer);
           nodesToRemove.push(nextSiblingNode);
           nextSiblingNode.attr("grv-usedalready", "yes");
-          previousSiblingNode = nextSiblingNode.next();
         }
       }
       // otherwise

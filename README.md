@@ -2,6 +2,22 @@
 
 Cleans and extracts a web(site) resource's metadata.
 
+## Development verification
+
+Use Node.js 22 or 24 for the current development toolchain. Run `npm ci`,
+`npm run lint`, `npm run build`, `npm test -- --runInBand` and
+`npm run test:package`. The package smoke check verifies the built entry point
+used by consumers; tests importing TypeScript source do not cover that boundary.
+Dependency maintenance keeps ESLint and its TypeScript plugins compatible,
+without changing the extraction API.
+
+October 21 maintenance audit: the development toolchain still includes
+[braces](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm) and
+[sprintf-js](https://github.com/advisories/GHSA-hp3w-g68c-fv3c) denial-of-service
+advisories. The full audit reports their transitive dependents as well. Do not
+apply npm's proposed major downgrades of Jest/semantic-release to clear the count;
+revisit when compatible patched upstream packages are available.
+
 Metadata extraction fields currently supported:
 
 | Name                     | Data Type      |
