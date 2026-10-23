@@ -11,6 +11,12 @@
 
 ### Bug Fixes
 
+* reject JSON-LD fallbacks that explicitly identify a different page
+* preserve document/content roots when layout attributes match noise-filter terms
+* fill missing typed metadata from a single page JSON-LD entity while preserving
+  explicit HTML values and existing string bounds; strategy is now
+  `2026-10-21.cheerio-v3`
+
 * resolve relative canonical, favicon, image, link, and video URLs against
   `finalUrl`/`inputUrl` in the typed API
 * bound oversized metadata strings and preserve escaped hostile tag-shaped text
