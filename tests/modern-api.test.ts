@@ -90,7 +90,7 @@ describe("Modern typed extraction API", () => {
     expect(data.jsonld).toHaveLength(3);
     expect(data.rawMeta["og:image"]).toEqual(["/images/primary.jpg"]);
     expect(data.extraction.packageVersion).toMatch(/^\d+\.\d+\.\d+/);
-    expect(data.extraction.strategyVersion).toBe("2026-05-26.cheerio-v1");
+    expect(data.extraction.strategyVersion).toBe("2026-10-21.cheerio-v3");
     expect(data.extraction.warnings).toContain(
       "jsonld block 2 could not be parsed",
     );

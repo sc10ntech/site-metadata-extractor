@@ -142,7 +142,7 @@ export interface LazyExtractedResource {
   extract: () => ExtractedResource;
 }
 
-const STRATEGY_VERSION = "2026-05-26.cheerio-v1";
+const STRATEGY_VERSION = "2026-10-21.cheerio-v3";
 const DEFAULT_MAX_STRING_LENGTH = 4096;
 const DEFAULT_MAX_CANDIDATES = 25;
 const DEFAULT_MAX_READABLE_TEXT_LENGTH = 200000;
@@ -446,6 +446,60 @@ function parseJsonLd(doc: CheerioAPI, warnings: string[]): unknown[] {
   return jsonld;
 }
 
+
+function isJsonObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function jsonString(value: unknown): string {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function jsonNames(value: unknown): string[] {
+  const values = Array.isArray(value) ? value : [value];
+  return values.map((item) => jsonString(isJsonObject(item) ? item.name : item))
+    .filter(Boolean);
+}
+
+// Use one page entity, not unrelated people, breadcrumbs or recommendations.
+// Embedded names are supported; resolving arbitrary @id graphs is out of scope.
+function pageJsonLd(jsonld: unknown[], pageUrl: string): Record<string, unknown> {
+  const records = jsonld.flatMap((item) => {
+    if (!isJsonObject(item)) return [];
+    return [item, ...(Array.isArray(item["@graph"])
+      ? item["@graph"].filter(isJsonObject) : [])];
+  });
+  const pageTypes = new Set(["Article", "NewsArticle", "BlogPosting", "WebPage"]);
+  const candidates = records.filter((item) => {
+    const types = Array.isArray(item["@type"]) ? item["@type"] : [item["@type"]];
+    return types.some((type) => pageTypes.has(jsonString(type).replace(/^https?:\/\/schema\.org\//, "")));
+  });
+  const pageIdentifiers = (item: Record<string, unknown>): string[] => {
+    const mainEntity = item.mainEntityOfPage;
+    return [item.url, item["@id"], isJsonObject(mainEntity) ? mainEntity["@id"] : mainEntity]
+      .map(jsonString).filter(Boolean);
+  };
+  const matches = candidates.filter((item) => {
+    return pageIdentifiers(item).some((value) => {
+      if (!pageUrl) return false;
+      try {
+        const candidate = new URL(value, pageUrl);
+        const page = new URL(pageUrl);
+        candidate.hash = "";
+        page.hash = "";
+        return candidate.href === page.href;
+      } catch { return false; }
+    });
+  });
+  if (matches.length === 1) return matches[0];
+  // A lone recommendation can still identify another page. Uniqueness alone
+  // does not justify borrowing its metadata when the requested page is known.
+  if (candidates.length === 1 && (!pageUrl || pageIdentifiers(candidates[0]).length === 0)) {
+    return candidates[0];
+  }
+  return {};
+}
+
 function getTextStats(text: string, truncated: boolean): TextStats {
   const words = text.match(/\S+/g) || [];
   const sentences = text.match(/[.!?](\s|$)/g) || [];
@@ -614,6 +668,10 @@ function buildMetadata(
     xmlMode: true,
   } as CheerioOptions);
   const rawMeta = getRawMeta(doc, warnings, maxStringLength);
+  const jsonld = parseJsonLd(docForJsonLd, warnings);
+  const structured = pageJsonLd(jsonld, finalUrl || inputUrl);
+  const authors = extractor.author(doc);
+
   const language = options.lang || extractor.lang(doc) || "";
   const canonicalCandidate =
     firstMetaValue(rawMeta, ["og:url"]) ||
@@ -624,7 +682,7 @@ function buildMetadata(
     resolveHttpUrl(canonicalCandidate, baseUrl) || canonicalCandidate || "";
   const faviconCandidates = getFaviconCandidates(doc, baseUrl, maxCandidates);
   const imageCandidates = getImageCandidates(doc, baseUrl, maxCandidates);
-  const title = cleanBounded(extractor.title(doc), "title", warnings, maxStringLength);
+  const title = cleanBounded(extractor.title(doc) || jsonString(structured.headline) || jsonString(structured.name), "title", warnings, maxStringLength);
   const softTitle = cleanBounded(
     extractor.softTitle(doc),
     "softTitle",
@@ -632,7 +690,7 @@ function buildMetadata(
     maxStringLength,
   );
   const description = cleanBounded(
-    extractor.description(doc),
+    extractor.description(doc) || jsonString(structured.description),
     "description",
     warnings,
     maxStringLength,
@@ -661,8 +719,8 @@ function buildMetadata(
   ].filter(Boolean).length;
 
   return {
-    author: extractor
-      .author(doc)
+    author: (authors.length > 0 ? authors : jsonNames(structured.author))
+      .slice(0, maxCandidates)
       .map((author) =>
         cleanBounded(author, "author", warnings, maxStringLength),
       )
@@ -680,7 +738,7 @@ function buildMetadata(
     finalUrl,
     imageCandidates,
     inputUrl,
-    jsonld: parseJsonLd(docForJsonLd, warnings),
+    jsonld,
     lang: language,
     links: readableParts.links,
     locale: cleanBounded(extractor.locale(doc), "locale", warnings, maxStringLength),
@@ -690,7 +748,7 @@ function buildMetadata(
       "dcterms.modified",
       "dc.date.modified",
       "dateModified",
-    ]),
+    ]) || cleanBounded(jsonString(structured.dateModified), "modifiedAt", warnings, maxStringLength),
     normalizedUrl,
     primaryImage: imageCandidates[0] || null,
     publishedAt: getDateValue(doc, rawMeta, [
@@ -700,9 +758,9 @@ function buildMetadata(
       "dc.date",
       "dc.date.issued",
       "datePublished",
-    ]),
+    ]) || cleanBounded(jsonString(structured.datePublished), "publishedAt", warnings, maxStringLength),
     publisher: cleanBounded(
-      extractor.publisher(doc),
+      extractor.publisher(doc) || jsonNames(structured.publisher)[0] || "",
       "publisher",
       warnings,
       maxStringLength,

@@ -23,6 +23,11 @@ function cleanBadTags(doc: CheerioAPI) {
   const regex = new RegExp(removeNodesRe, "i");
 
   const toRemove = doc("*").filter((_index, el) => {
+    // Layout feature classes (for example "page-tools-enabled") can occur on
+    // document roots. Removing these containers discards all readable content.
+    if (["html", "body", "main"].includes(getTagName(doc(el)))) {
+      return false;
+    }
     const idEl = doc(el).attr("id");
     const classEl = doc(el).attr("class");
     const nameEl = doc(el).attr("name");
