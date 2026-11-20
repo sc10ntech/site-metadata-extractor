@@ -11,12 +11,21 @@ used by consumers; tests importing TypeScript source do not cover that boundary.
 Dependency maintenance keeps ESLint and its TypeScript plugins compatible,
 without changing the extraction API.
 
-October 21 maintenance audit: the development toolchain still includes
-[braces](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm) and
-[sprintf-js](https://github.com/advisories/GHSA-hp3w-g68c-fv3c) denial-of-service
-advisories. The full audit reports their transitive dependents as well. Do not
-apply npm's proposed major downgrades of Jest/semantic-release to clear the count;
-revisit when compatible patched upstream packages are available.
+November 20 maintenance audit: compatible lockfile updates patch Undici to
+6.29.1 inside the release tooling and update ESLint, its TypeScript plugins and
+Prettier. The production audit is clean. The full audit reports 52 moderate
+entries, including dependent packages, from
+[Glob](https://github.com/advisories/GHSA-3g3m-2fjr-6pw4) and
+[Minimatch](https://github.com/advisories/GHSA-g3hv-75wg-m249) in the development
+toolchain. No high or critical findings remain. These counts do not establish
+that an application path is exploitable. Revisit when Jest, TypeDoc and the
+release tooling support patched dependency versions; do not force incompatible
+overrides or npm's proposed major downgrades to clear the count.
+
+Semantic Release stays on version 25: proposed version 26.0.1 requires Node
+26.13 or newer, which is incompatible with this repository's Node 22/24 CI.
+The lockfile update passes lint, build, 120 tests and the built-package smoke
+check on Node 24.22.3. Release behavior and the extraction API are unchanged.
 
 Metadata extraction fields currently supported:
 
