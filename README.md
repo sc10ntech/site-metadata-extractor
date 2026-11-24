@@ -4,28 +4,56 @@ Cleans and extracts a web(site) resource's metadata.
 
 ## Development verification
 
-Use Node.js 22 or 24 for the current development toolchain. Run `npm ci`,
-`npm run lint`, `npm run build`, `npm test -- --runInBand` and
-`npm run test:package`. The package smoke check verifies the built entry point
-used by consumers; tests importing TypeScript source do not cover that boundary.
-Dependency maintenance keeps ESLint and its TypeScript plugins compatible,
-without changing the extraction API.
+Use Node.js 22.14 or newer in the 22.x line, or Node.js 24.10 or newer.
+Run `npm ci`, `npm run semantic-release -- --version`, `npm run lint`,
+`npm run build`, `npm test -- --runInBand` and `npm run test:package`.
+The release-tool version command checks startup without publishing; CI runs it
+on both supported Node versions. The package smoke check verifies the built
+entry point used by consumers, which source-only tests do not cover.
 
-November 20 maintenance audit: compatible lockfile updates patch Undici to
-6.29.1 inside the release tooling and update ESLint, its TypeScript plugins and
-Prettier. The production audit is clean. The full audit reports 52 moderate
-entries, including dependent packages, from
-[Glob](https://github.com/advisories/GHSA-3g3m-2fjr-6pw4) and
-[Minimatch](https://github.com/advisories/GHSA-g3hv-75wg-m249) in the development
-toolchain. No high or critical findings remain. These counts do not establish
-that an application path is exploitable. Revisit when Jest, TypeDoc and the
-release tooling support patched dependency versions; do not force incompatible
-overrides or npm's proposed major downgrades to clear the count.
+### November 24 dependency maintenance
 
-Semantic Release stays on version 25: proposed version 26.0.1 requires Node
-26.13 or newer, which is incompatible with this repository's Node 22/24 CI.
-The lockfile update passes lint, build, 120 tests and the built-package smoke
-check on Node 24.22.3. Release behavior and the extraction API are unchanged.
+Semantic Release 26.0.1 failed in the release workflow because it requires Node
+26.13 or newer. Version 25.0.9 restores compatibility with this repository's
+Node 22/24 toolchain. Dependabot proposals for version 26 and later are deferred
+until a deliberate Node/toolchain upgrade. A new CI startup check prevents this
+engine mismatch from passing unnoticed again. Actual publication is verified
+separately by the release workflow after merge.
+
+Compatible Glob updates install 13.0.7 and 14.0.6 where existing parent ranges
+allow them. These address the
+[aborted traversal advisory](https://github.com/advisories/GHSA-3g3m-2fjr-6pw4)
+on those paths. The advisory range still includes Glob 13.0.7, so the audit
+continues to flag it despite its source fix. Older copies also remain inside
+npm and test-exclude.
+
+The production dependency audit reports zero findings. The full audit reports
+52 moderate entries, including affected dependent packages, and no high or
+critical findings. Main before this repair had 35 moderate entries: returning
+to the compatible release tool changes the dependency tree and increases the
+number of affected dependent-package entries. Counts are
+not independent vulnerabilities or proof of an exploitable application path.
+The previously patched Undici versions remain in place.
+
+[Minimatch's denial-of-service advisory](https://github.com/advisories/GHSA-g3hv-75wg-m249)
+remains unresolved in the development toolchain. Crafted glob patterns can cause
+excessive CPU/memory use when optimization level 2 is enabled. Glob enables that
+mode; Jest and npm use Glob. The extractor's production dependency graph does
+not include Minimatch. Project-controlled test patterns reduce exposure, but
+this does not prove that every development/release input is trusted.
+
+The first patched Minimatch is 11.0.1. Current Jest, test-exclude, TypeDoc and
+npm releases still require or bundle affected older versions. A blanket override
+is incompatible: [Minimatch 11 removes APIs](https://github.com/isaacs/minimatch/compare/v10.2.6...v11.0.0)
+used by Glob 13 and [TypeDoc's file traversal](https://github.com/TypeStrong/typedoc/blob/v0.28.20/src/lib/utils/fs.ts).
+Do not dismiss the alert or force that override. Revisit when these parent tools
+adopt compatible patched dependencies, including npm's bundled dependencies,
+or when a compatible backport becomes available.
+
+Verification on Node 24.22.3: clean install, lint, build, all 120 tests, coverage and the
+built-package smoke check pass. The release-tool startup check also passes on
+Node 22.22.0. This fixes the observed startup failure; it is not evidence of a
+successful package publication. The extraction API is unchanged.
 
 Metadata extraction fields currently supported:
 

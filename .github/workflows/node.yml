@@ -21,6 +21,8 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: npm
       - run: npm ci
+      - name: Verify release tool supports this Node.js version
+        run: npm run semantic-release -- --version
       - run: npm run build --if-present
       - run: npm run lint
       - run: npm test
