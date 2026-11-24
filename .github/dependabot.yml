@@ -5,3 +5,7 @@ updates:
   schedule:
     interval: daily
   open-pull-requests-limit: 10
+  # Version 26 requires Node >=26.13; revisit with a deliberate CI/runtime upgrade.
+  ignore:
+  - dependency-name: semantic-release
+    versions: [">=26.0.0"]
